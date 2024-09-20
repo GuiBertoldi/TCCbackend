@@ -66,3 +66,6 @@ https://portifoliocatolica.atlassian.net/jira/core/projects/PC/board
 
 #Documentação completa
 https://docs.google.com/document/d/138YQyWQwToKGpdoL5pM26lZbNUYKrAj0CF4wVRMhy_o/edit
+
+#Design - Figma
+https://www.figma.com/design/ZpLjIQNsBMAlqIIKzfwjYJ/Layout-TCC?node-id=0-1&t=rhleRxE8iZHLQMcT-1
