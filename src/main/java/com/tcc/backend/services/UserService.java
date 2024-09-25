@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.Optional;
 
@@ -22,6 +21,7 @@ public class UserService {
     }
 
     private final UserRepository repository;
+
     public User create(final User user) {
         Assert.isTrue(this.getByCpf(user.getCpf()).isEmpty(), "Já existe um usuário cadastrado com este CPF.");
         final User newUser = repository.save(user);
@@ -29,7 +29,7 @@ public class UserService {
     }
 
     public User update(final User user) {
-        Assert.notNull(user.getIdUser(), "Id deve ser informado");
+        Assert.notNull(user.getIdUser(), "Id não informado");
         Assert.isTrue(this.getById(user.getIdUser()).isPresent(), "Usuário não encontrado");
         return repository.save(user);
     }
