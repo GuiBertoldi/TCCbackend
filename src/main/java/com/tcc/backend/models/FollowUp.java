@@ -24,6 +24,7 @@ public class FollowUp {
     @Column(name = "pro_spec")
     private String professionalSpecialty;
 
+
     @ManyToOne
     @JoinColumn(name = "idPatient")
     private Patient idpatient;

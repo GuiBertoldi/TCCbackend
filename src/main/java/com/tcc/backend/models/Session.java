@@ -18,10 +18,15 @@ public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id_ses")
     private Long idSession;
+    @Column(name = "numb_ses")
     private Long sessionNumber;
+    @Column(name = "date_ses")
     private LocalDate sessionDate;
+    @Column(name = "reas_ses")
     private String reason;
+    @Column(name = "desc_ses")
     private String description;
 
     @ManyToOne
@@ -29,8 +34,6 @@ public class Session {
     private Patient idpatient;
 
     @ManyToOne
-    @JoinColumn(name = "idUser")
+    @JoinColumn(name = "id_User")
     private User idPsychologist;
-
-
 }

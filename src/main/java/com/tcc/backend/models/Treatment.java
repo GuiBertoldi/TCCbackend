@@ -26,6 +26,4 @@ public class Treatment {
     private LocalDate StartTreatment;
     @Column(name = "end_tre")
     private LocalDate EndTreatment;
-
-
 }
