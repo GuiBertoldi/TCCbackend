@@ -16,8 +16,11 @@ public class Document {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id_doc")
     private Long idDoc;
-    private String title;
+    @Column(name = "title_doc")
+    private String titleDoc;
     @Lob
-    private byte[] document;
+    @Column(name = "type_doc")
+    private byte[] typeDoc;
 }

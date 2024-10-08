@@ -16,8 +16,10 @@ public class Patient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id_Patient")
     private Long idPatient;
-    private String name;
+    @Column(name = "id_Patient")
+    private String namePatient;
     private String email;
     private String status;
     private String cpf;
