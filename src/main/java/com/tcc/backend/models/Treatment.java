@@ -26,4 +26,9 @@ public class Treatment {
     private LocalDate StartTreatment;
     @Column(name = "end_tre")
     private LocalDate EndTreatment;
+
+    @ManyToOne
+    @JoinColumn(name = "idPatient")
+    private Patient idpatient;
+
 }

@@ -23,7 +23,7 @@ public class DocumentService {
     private final DocumentRepository repository;
 
     public Document create(final Document document) {
-        Assert.isTrue(this.getByTitle(document.getTitle()).isEmpty(), "Já existe um documento cadastrado com este nome.");
+        Assert.isTrue(this.getByTitle(document.getTitleDoc()).isEmpty(), "Já existe um documento cadastrado com este nome.");
         final Document newDocument = repository.save(document);
         return newDocument;
     }

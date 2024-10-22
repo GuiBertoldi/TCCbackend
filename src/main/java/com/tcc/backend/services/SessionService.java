@@ -27,7 +27,7 @@ public class SessionService {
 
     public Session create(final Session session) {
         Patient patient = session.getIdpatient();
-        Optional<Session> lastSession = repository.findTopByPatientOrderBySessionNumberDesc(patient.getIdPatient());
+        Optional<Session> lastSession = repository.findTopByPatientOrderBySessionNumberDesc(patient.getIdUser());
         Long newSessionNumber = lastSession.map(last -> last.getSessionNumber() + 1).orElse(1L);
         session.setSessionNumber(newSessionNumber);
 

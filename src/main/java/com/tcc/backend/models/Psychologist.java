@@ -3,7 +3,6 @@ package com.tcc.backend.models;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
@@ -11,13 +10,18 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "psychologist")
-public class Psychologist extends User {
+public class Psychologist{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id_user")
-    private Long idUser;
-
+    @Column(name = "id_psychologist")
+    private Long idPsychologist;
     @Column(name = "crp_user")
     private String crp;
+
+    @OneToOne
+    @JoinColumn(name = "idUser")
+    private User idUser;
+
+
 }
