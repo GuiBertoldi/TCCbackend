@@ -23,23 +23,16 @@ public class PsychologistService {
     private final PsychologistRepository repository;
 
     public Psychologist create(final Psychologist psychologist) {
-        Assert.isTrue(this.getByCpf(psychologist.getCpf()).isEmpty(), "Já existe um usuário cadastrado com este CPF.");
         final Psychologist newPsychologist = repository.save(psychologist);
         return newPsychologist;
     }
 
     public Psychologist update(final Psychologist psychologist) {
-        Assert.notNull(psychologist.getIdUser(), "Id não informado");
-        Assert.isTrue(this.getById(psychologist.getIdUser()).isPresent(), "Usuário não encontrado");
         return repository.save(psychologist);
     }
 
     public Optional<Psychologist> getById(final Long id) {
         return repository.findById(id);
-    }
-
-    public Optional<Psychologist> getByCpf(String cpf) {
-        return repository.findByCpf(cpf);
     }
 
     public Page<Psychologist> list(Pageable pageable) {

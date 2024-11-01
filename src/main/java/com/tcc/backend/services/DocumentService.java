@@ -23,14 +23,11 @@ public class DocumentService {
     private final DocumentRepository repository;
 
     public Document create(final Document document) {
-        Assert.isTrue(this.getByTitle(document.getTitleDoc()).isEmpty(), "Já existe um documento cadastrado com este nome.");
         final Document newDocument = repository.save(document);
         return newDocument;
     }
 
     public Document update(final Document document) {
-        Assert.notNull(document.getIdDoc(), "Id não informado");
-        Assert.isTrue(this.getById(document.getIdDoc()).isPresent(), "Documento não encontrado");
         return repository.save(document);
     }
 

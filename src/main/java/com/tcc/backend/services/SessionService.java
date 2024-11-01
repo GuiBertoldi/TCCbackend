@@ -23,21 +23,20 @@ public class SessionService {
         this.repository = repository;
     }
 
-    private final SessionRepository repository;;
+    private final SessionRepository repository;
 
     public Session create(final Session session) {
         Patient patient = session.getIdpatient();
-        Optional<Session> lastSession = repository.findTopByPatientOrderBySessionNumberDesc(patient.getIdUser());
+        //MELHORAR
+/*        Optional<Session> lastSession = repository.findTopByPatientOrderBySessionNumberDesc(patient.g);
         Long newSessionNumber = lastSession.map(last -> last.getSessionNumber() + 1).orElse(1L);
-        session.setSessionNumber(newSessionNumber);
+        session.setSessionNumber(newSessionNumber);*/
 
         final Session newSession = repository.save(session);
         return newSession;
     }
 
     public Session update(final Session session) {
-        Assert.notNull(session.getIdSession(), "Id não informado");
-        Assert.isTrue(this.getById(session.getIdSession()).isPresent(), "Sessão não encontrada");
         return repository.save(session);
     }
 

@@ -20,12 +20,12 @@ public class TreatmentController {
 
     private final TreatmentService service;
 
-    @PostMapping
+    @PostMapping("create")
     public ResponseEntity<Object> create(@RequestBody final Treatment treatment) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(treatment));
     }
 
-    @PutMapping
+    @PutMapping("update")
     public ResponseEntity<Object> update(@RequestBody final Treatment treatment) {
         return ResponseEntity.ok(service.update(treatment));
     }

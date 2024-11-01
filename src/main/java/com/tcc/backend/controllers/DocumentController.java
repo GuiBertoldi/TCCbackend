@@ -20,12 +20,12 @@ public class DocumentController {
 
     private final DocumentService service;
 
-    @PostMapping
+    @PostMapping("create")
     public ResponseEntity<Object> create(@RequestBody final Document documents) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(documents));
     }
 
-    @PutMapping
+    @PutMapping("update")
     public ResponseEntity<Object> update(@RequestBody final Document documents) {
         return ResponseEntity.ok(service.update(documents));
     }

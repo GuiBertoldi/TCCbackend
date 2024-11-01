@@ -11,5 +11,5 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     Optional<Session> findByNamePatient(final String namePatient);
     Optional<Session> findBySessionDate(final LocalDate sessionDate);
     Optional<Session> findBySessionNumber(final Long sessionNumber);
-    Optional<Session> findTopByPatientOrderBySessionNumberDesc(final Long idPatient);
+    //Optional<Session> findTopByPatientOrderBySessionNumberDesc(final Long idPatient);
 }

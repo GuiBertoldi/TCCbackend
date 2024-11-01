@@ -28,7 +28,6 @@ public class FollowUpService {
     }
 
     public FollowUp update(final FollowUp followUp) {
-        Assert.notNull(followUp.getIdFollowUp(), "Id não informado");
         return repository.save(followUp);
     }
 

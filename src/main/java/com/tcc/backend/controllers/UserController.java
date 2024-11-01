@@ -20,12 +20,12 @@ public class UserController {
 
     private final UserService service;
 
-    @PostMapping
+    @PostMapping("create")
     public ResponseEntity<Object> create(@RequestBody final User users) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(users));
     }
-
-    @PutMapping
+    ///{userId}
+    @PutMapping("update")
     public ResponseEntity<Object> update(@RequestBody final User users) {
         return ResponseEntity.ok(service.update(users));
     }
@@ -35,7 +35,7 @@ public class UserController {
         return ResponseEntity.ok(service.getByCpf(cpf));
     }
 
-    @GetMapping
+    @GetMapping("list")
     public Page<User> list(Pageable pageable) {
         return service.list(pageable);
     }

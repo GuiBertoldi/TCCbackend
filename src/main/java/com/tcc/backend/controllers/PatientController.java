@@ -20,17 +20,17 @@ public class PatientController {
 
     private final PatientService service;
 
-    @PostMapping
+    @PostMapping("create")
     public ResponseEntity<Object> create(@RequestBody final Patient patients) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(patients));
     }
 
-    @PutMapping
+    @PutMapping("update")
     public ResponseEntity<Object> update(@RequestBody final Patient patients) {
         return ResponseEntity.ok(service.update(patients));
     }
 
-    @GetMapping("/cpf")
+/*    @GetMapping("/cpf")
     public ResponseEntity<Object> findByCpf(@RequestParam String cpf) {
         return ResponseEntity.ok(service.getByCpf(cpf));
     }
@@ -38,7 +38,7 @@ public class PatientController {
     @GetMapping("/name")
     public ResponseEntity<Object> findByName(@RequestParam String name) {
         return ResponseEntity.ok(service.getByName(name));
-    }
+    }*/
 
     @GetMapping
     public Page<Patient> list(Pageable pageable) {

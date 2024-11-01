@@ -4,6 +4,8 @@ import com.tcc.backend.models.Treatment;
 import com.tcc.backend.repositories.TreatmentRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -26,11 +28,13 @@ public class TreatmentService {
     }
 
     public Treatment update(final Treatment treatment){
-        Assert.notNull(treatment.getIdTreatment(), "Id não informado");
         return repository.save(treatment);
     }
 
     public Optional<Treatment> findById(final Long idTreatment){
         return repository.findById(idTreatment);
+    }
+    public Page<Treatment> list(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 }

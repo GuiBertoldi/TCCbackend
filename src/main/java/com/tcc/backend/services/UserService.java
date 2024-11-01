@@ -23,14 +23,11 @@ public class UserService {
     private final UserRepository repository;
 
     public User create(final User user) {
-        Assert.isTrue(this.getByCpf(user.getCpf()).isEmpty(), "Já existe um usuário cadastrado com este CPF.");
         final User newUser = repository.save(user);
         return newUser;
     }
 
     public User update(final User user) {
-        Assert.notNull(user.getIdUser(), "Id não informado");
-        Assert.isTrue(this.getById(user.getIdUser()).isPresent(), "Usuário não encontrado");
         return repository.save(user);
     }
 

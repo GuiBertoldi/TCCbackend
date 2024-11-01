@@ -1,7 +1,6 @@
 package com.tcc.backend.services;
 
 import com.tcc.backend.models.Patient;
-import com.tcc.backend.models.User;
 import com.tcc.backend.repositories.PatientRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +28,15 @@ public class PatientService {
     }
 
     public Patient update(final Patient patient) {
-        Assert.notNull(patient., "Id não informado");
-        Assert.isTrue(this.getById(patient.getIdPatient()).isPresent(), "Paciente não encontrado");
         return repository.save(patient);
     }
 
     public Optional<Patient> getById(final Long id) {
         return repository.findById(id);
+    }
+
+    public Optional<Patient> getByIdPatient(final Long idPatient) {
+        return repository.findByIdPatient(idPatient);
     }
 
     public Page<Patient> list(Pageable pageable) {

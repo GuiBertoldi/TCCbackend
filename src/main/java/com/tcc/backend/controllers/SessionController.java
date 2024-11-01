@@ -20,12 +20,12 @@ public class SessionController {
 
     private final SessionService service;
 
-    @PostMapping
+    @PostMapping("create")
     public ResponseEntity<Object> create(@RequestBody final Session session) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(session));
     }
 
-    @PutMapping
+    @PutMapping("update")
     public ResponseEntity<Object> update(@RequestBody final Session session) {
         return ResponseEntity.ok(service.update(session));
     }

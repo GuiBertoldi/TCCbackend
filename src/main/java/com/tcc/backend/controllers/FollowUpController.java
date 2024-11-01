@@ -20,12 +20,12 @@ public class FollowUpController {
         this.service = service;
     }
 
-    @PostMapping
+    @PostMapping("create")
     public ResponseEntity<Object> create(@RequestBody final FollowUp followUp) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(followUp));
     }
 
-    @PutMapping
+    @PutMapping("update")
     public ResponseEntity<Object> update(@RequestBody final FollowUp followUp) {
         return ResponseEntity.ok(service.update(followUp));
     }
