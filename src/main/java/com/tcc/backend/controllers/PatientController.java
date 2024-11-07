@@ -20,15 +20,22 @@ public class PatientController {
 
     private final PatientService service;
 
-    @PostMapping("create")
-    public ResponseEntity<Object> create(@RequestBody final Patient patients) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(patients));
+    @PostMapping("/create")
+    public ResponseEntity<Object> create(@RequestBody Patient patients) {
+        service.create(patients);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PutMapping("update")
-    public ResponseEntity<Object> update(@RequestBody final Patient patients) {
-        return ResponseEntity.ok(service.update(patients));
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable Long idPatient, @RequestBody Patient patients) {
+        service.update(patients, request);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> findById(@RequestBody final Patient patients) {
+        service.delete(patients);
+        return ResponseEntity<>(HttpStatus.OK);
 
 /*    @GetMapping("/cpf")
     public ResponseEntity<Object> findByCpf(@RequestParam String cpf) {

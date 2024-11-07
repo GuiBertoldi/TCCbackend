@@ -1,6 +1,7 @@
 package com.tcc.backend.services;
 
 import com.tcc.backend.models.FollowUp;
+import com.tcc.backend.models.Patient;
 import com.tcc.backend.repositories.FollowUpRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,10 @@ public class FollowUpService {
 
     public Optional<FollowUp> findById(final Long idFollowUp) {
         return repository.findById(idFollowUp);
+    }
+
+    public Optional<FollowUp> findByIdPatient(final Patient IdPatient) {
+        return repository.findByIdpatient(IdPatient);
     }
 
     public Page<FollowUp> list(Pageable pageable) {

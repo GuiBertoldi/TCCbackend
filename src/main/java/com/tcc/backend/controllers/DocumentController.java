@@ -1,6 +1,8 @@
 package com.tcc.backend.controllers;
 
+import com.tcc.backend.dtos.documents.DocumentRequest;
 import com.tcc.backend.models.Document;
+import com.tcc.backend.models.Patient;
 import com.tcc.backend.services.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,23 +21,33 @@ public class DocumentController {
     }
 
     private final DocumentService service;
-
-    @PostMapping("create")
-    public ResponseEntity<Object> create(@RequestBody final Document documents) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(documents));
+    //Replicar para todos as rotas que precisam retornar algo, de modo geral os gets e remover esta merda do create
+    @PostMapping
+    public ResponseEntity<Document> create(@RequestBody DocumentRequest request) {
+        Document document = service.create(request);
+        return new ResponseEntity<>(document, HttpStatus.CREATED);
     }
 
-    @PutMapping("update")
-    public ResponseEntity<Object> update(@RequestBody final Document documents) {
-        return ResponseEntity.ok(service.update(documents));
+    @PutMapping("/{idDoc}")
+    public ResponseEntity<Void> update(@PathVariable Long idDoc, @RequestBody DocumentRequest request) {
+        service.update(idDoc, request);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    //Para listar todos os documentos com nome parecido utilizar o list com like, dar uma olhada no gothan sbpagamento
+    //alterar para getbyid e adicionar em todos as controllers
+    @GetMapping("{titleDoc}")
+    public ResponseEntity<Void> findByTitle(@RequestParam String titleDoc) {
+        service.getByTitle(titleDoc);
+        return new ResponseEntity <>(HttpStatus.OK);
     }
 
-    @GetMapping("/title")
-    public ResponseEntity<Object> findByTitle(@RequestParam String title) {
-        return ResponseEntity.ok(service.getByTitle(title));
+    @DeleteMapping("{idDoc}")
+    public ResponseEntity<Void> delete(@RequestParam Long idDoc) {
+        service.delete(idDoc);
+        return new ResponseEntity <>(HttpStatus.OK);
     }
-
-    @GetMapping
+    //para casos mais especificos utilizar query param, dessa forma é possível listar utilizando mais atributos no filtro
+    @GetMapping("/list")
     public Page<Document> list(Pageable pageable) {
         return service.list(pageable);
     }

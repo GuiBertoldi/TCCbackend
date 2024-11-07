@@ -1,5 +1,7 @@
 package com.tcc.backend.services;
 
+import com.tcc.backend.dtos.documents.DocumentRequest;
+import com.tcc.backend.dtos.documents.DocumentResponse;
 import com.tcc.backend.models.Document;
 import com.tcc.backend.repositories.DocumentRepository;
 import jakarta.transaction.Transactional;
@@ -7,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.util.Optional;
 
@@ -22,21 +23,32 @@ public class DocumentService {
 
     private final DocumentRepository repository;
 
-    public Document create(final Document document) {
-        final Document newDocument = repository.save(document);
+    //reproduzir para os outros creates e para o update também
+    public Document create(DocumentRequest request) {
+        final Document newDocument = repository.save(
+                Document.builder()
+                        .titleDoc(request.getTitleDoc())
+                        .typeDoc(request.getTypeDoc())
+                        .build());
         return newDocument;
     }
-
-    public Document update(final Document document) {
-        return repository.save(document);
+    // Fazer igual o create, não está funcionando desta forma
+    public void update(Long idDoc, DocumentRequest request) {
+        Document document = repository.findById(idDoc).orElseThrow();
+        repository.save(document);
     }
 
-    public Optional<Document> getById(final Long id) {
-        return repository.findById(id);
+    public void delete(Long idDoc) {
+        Document document = repository.findById(idDoc).orElseThrow();
+        repository.delete(document);
     }
 
-    public Optional<Document> getByTitle(final String title) {
-        return repository.findByTitle(title);
+    public Optional<Document> getById(final Long idDoc) {
+        return repository.findById(idDoc);
+    }
+
+    public Optional<Document> getByTitle(String titleDoc) {
+        return repository.findByTitle(titleDoc);
     }
 
     public Page<Document> list(Pageable pageable) {

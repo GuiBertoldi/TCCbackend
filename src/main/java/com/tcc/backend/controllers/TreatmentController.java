@@ -30,7 +30,7 @@ public class TreatmentController {
         return ResponseEntity.ok(service.update(treatment));
     }
 
-    @GetMapping
+    @GetMapping("list")
     public Page<Treatment> list(Pageable pageable) {
         return service.list(pageable);
     }
