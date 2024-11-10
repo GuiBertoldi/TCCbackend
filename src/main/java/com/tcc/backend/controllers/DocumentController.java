@@ -2,7 +2,6 @@ package com.tcc.backend.controllers;
 
 import com.tcc.backend.dtos.documents.DocumentRequest;
 import com.tcc.backend.models.Document;
-import com.tcc.backend.models.Patient;
 import com.tcc.backend.services.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/documents")
@@ -33,9 +34,9 @@ public class DocumentController {
         service.update(idDoc, request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    //Para listar todos os documentos com nome parecido utilizar o list com like, dar uma olhada no gothan sbpagamento
     //alterar para getbyid e adicionar em todos as controllers
-    @GetMapping("{titleDoc}")
+    //fix trocar para getID
+    @GetMapping("{idDoc}")
     public ResponseEntity<Void> findByTitle(@RequestParam String titleDoc) {
         service.getByTitle(titleDoc);
         return new ResponseEntity <>(HttpStatus.OK);
@@ -46,9 +47,10 @@ public class DocumentController {
         service.delete(idDoc);
         return new ResponseEntity <>(HttpStatus.OK);
     }
-    //para casos mais especificos utilizar query param, dessa forma é possível listar utilizando mais atributos no filtro
-    @GetMapping("/list")
-    public Page<Document> list(Pageable pageable) {
-        return service.list(pageable);
+
+    @GetMapping
+    public ResponseEntity<Page<Document>> list(@RequestParam(required = false) String titleDoc, Pageable pageable) {
+        Page<Document> documentList = service.list(titleDoc, pageable);
+        return new ResponseEntity<>(documentList, HttpStatus.OK);
     }
 }

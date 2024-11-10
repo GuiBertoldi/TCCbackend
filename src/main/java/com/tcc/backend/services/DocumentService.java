@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -51,7 +52,10 @@ public class DocumentService {
         return repository.findByTitle(titleDoc);
     }
 
-    public Page<Document> list(Pageable pageable) {
+    public Page<Document> list(String titleDoc, Pageable pageable ) {
+        if (titleDoc != null && !titleDoc.isEmpty()) {
+            return repository.findByTitleDocContainingIgnoreCase(titleDoc, pageable);
+        }
         return repository.findAll(pageable);
     }
 }
