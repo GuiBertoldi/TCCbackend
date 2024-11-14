@@ -13,5 +13,5 @@ public class DocumentResponse {
 
     private String titleDoc;
 
-    private String typeDoc;
+    private byte[] typeDoc;
 }

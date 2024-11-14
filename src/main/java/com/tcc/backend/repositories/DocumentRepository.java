@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface DocumentRepository extends JpaRepository<Document, Long> {
-    Optional<Document> findByTitle(String titleDoc);
+    Optional<Document> findByTitleDoc(String titleDoc);
     Page<Document> findByTitleDocContainingIgnoreCase(String titleDoc, Pageable pageable);
 }
 

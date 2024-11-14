@@ -22,7 +22,7 @@ public class DocumentController {
     }
 
     private final DocumentService service;
-    //Replicar para todos as rotas que precisam retornar algo, de modo geral os gets e remover esta merda do create
+
     @PostMapping
     public ResponseEntity<Document> create(@RequestBody DocumentRequest request) {
         Document document = service.create(request);
@@ -37,8 +37,8 @@ public class DocumentController {
     //alterar para getbyid e adicionar em todos as controllers
     //fix trocar para getID
     @GetMapping("{idDoc}")
-    public ResponseEntity<Void> findByTitle(@RequestParam String titleDoc) {
-        service.getByTitle(titleDoc);
+    public ResponseEntity<Void> findByTitleDoc(@RequestParam String titleDoc) {
+        service.getByTitleDoc(titleDoc);
         return new ResponseEntity <>(HttpStatus.OK);
     }
 

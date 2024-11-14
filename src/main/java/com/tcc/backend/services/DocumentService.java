@@ -33,10 +33,16 @@ public class DocumentService {
                         .build());
         return newDocument;
     }
-    // Fazer igual o create, não está funcionando desta forma
-    public void update(Long idDoc, DocumentRequest request) {
-        Document document = repository.findById(idDoc).orElseThrow();
-        repository.save(document);
+
+    public Document update(Long idDoc, DocumentRequest request) {
+        Document document = repository.findById(idDoc).orElse(null);
+        Document updatedDocument = repository.save(
+                Document.builder()
+                        .idDoc(document.getIdDoc())
+                        .titleDoc(request.getTitleDoc())
+                        .typeDoc(request.getTypeDoc())
+                        .build());
+        return updatedDocument;
     }
 
     public void delete(Long idDoc) {
@@ -48,8 +54,8 @@ public class DocumentService {
         return repository.findById(idDoc);
     }
 
-    public Optional<Document> getByTitle(String titleDoc) {
-        return repository.findByTitle(titleDoc);
+    public Optional<Document> getByTitleDoc(String titleDoc) {
+        return repository.findByTitleDoc(titleDoc);
     }
 
     public Page<Document> list(String titleDoc, Pageable pageable ) {

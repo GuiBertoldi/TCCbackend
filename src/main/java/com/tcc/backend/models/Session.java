@@ -30,7 +30,7 @@ public class Session {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "idPatient")
+    @JoinColumn(name = "id_Patient")
     private Patient idpatient;
     @ManyToOne
     @JoinColumn(name = "id_psychologist")
