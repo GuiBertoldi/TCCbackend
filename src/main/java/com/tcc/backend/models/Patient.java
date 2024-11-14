@@ -20,7 +20,7 @@ public class Patient{
     private Long idPatient;
 
     @OneToOne
-    @JoinColumn(name = "idUser")
+    @JoinColumn(name = "id_User")
     private User idUser;
 
     @Column(name = "emer_con")
