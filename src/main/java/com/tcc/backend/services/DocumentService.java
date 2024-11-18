@@ -1,7 +1,6 @@
 package com.tcc.backend.services;
 
 import com.tcc.backend.dtos.documents.DocumentRequest;
-import com.tcc.backend.dtos.documents.DocumentResponse;
 import com.tcc.backend.models.Document;
 import com.tcc.backend.repositories.DocumentRepository;
 import jakarta.transaction.Transactional;
@@ -9,9 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -24,7 +20,6 @@ public class DocumentService {
 
     private final DocumentRepository repository;
 
-    //reproduzir para os outros creates e para o update também
     public Document create(DocumentRequest request) {
         final Document newDocument = repository.save(
                 Document.builder()
@@ -50,12 +45,12 @@ public class DocumentService {
         repository.delete(document);
     }
 
-    public Optional<Document> getById(final Long idDoc) {
-        return repository.findById(idDoc);
+    public Document getById(Long idDoc) {
+        return repository.findById(idDoc).orElseThrow();
     }
 
-    public Optional<Document> getByTitleDoc(String titleDoc) {
-        return repository.findByTitleDoc(titleDoc);
+    public Document getByTitleDoc(String titleDoc) {
+        return repository.findByTitleDoc(titleDoc).orElseThrow();
     }
 
     public Page<Document> list(String titleDoc, Pageable pageable ) {
