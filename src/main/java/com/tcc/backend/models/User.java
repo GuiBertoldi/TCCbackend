@@ -1,5 +1,6 @@
 package com.tcc.backend.models;
 
+import com.tcc.backend.enums.UserType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,8 +19,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_user")
     private Long idUser;
-    @Column(name = "type_user")
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type_user", nullable = false)
+    private UserType type;
     @Column(name = "name_user")
     private String name;
     @Column(name = "email_user")

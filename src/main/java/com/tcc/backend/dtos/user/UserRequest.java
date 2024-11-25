@@ -1,5 +1,6 @@
-package com.tcc.backend.dtos.users;
+package com.tcc.backend.dtos.user;
 
+import com.tcc.backend.enums.UserType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,8 +17,8 @@ public class UserRequest {
 
     private Long idUser;
 
-    @NotBlank(message = "O tipo de usuário deve ser informado!")
-    private String type;
+    @NotNull(message = "O tipo de usuário deve ser informado!")
+    private UserType type;
 
     @NotBlank(message = "O nome deve ser informado!")
     private String name;

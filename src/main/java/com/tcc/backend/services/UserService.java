@@ -1,6 +1,6 @@
 package com.tcc.backend.services;
 
-import com.tcc.backend.dtos.users.UserRequest;
+import com.tcc.backend.dtos.user.UserRequest;
 import com.tcc.backend.models.User;
 import com.tcc.backend.repositories.UserRepository;
 import jakarta.transaction.Transactional;

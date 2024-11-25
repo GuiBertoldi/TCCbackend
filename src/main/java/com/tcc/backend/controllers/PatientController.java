@@ -1,7 +1,9 @@
 package com.tcc.backend.controllers;
 
+import com.tcc.backend.dtos.patient.PatientRequest;
 import com.tcc.backend.models.Patient;
 import com.tcc.backend.services.PatientService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,42 +15,40 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/patients")
 public class PatientController {
 
+    private final PatientService service;
+
     @Autowired
     public PatientController(final PatientService service) {
         this.service = service;
     }
 
-    private final PatientService service;
-
-    @PostMapping("/create")
-    public ResponseEntity<Object> create(@RequestBody Patient patients) {
-        service.create(patients);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    @PostMapping
+    public ResponseEntity<Patient> create(@RequestBody @Valid PatientRequest request) {
+        Patient patient = service.createPatient(request);
+        return new ResponseEntity<>(patient, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@PathVariable Long idPatient, @RequestBody Patient patients) {
-        service.update(patients, request);
+    @PutMapping("/{idPatient}")
+    public ResponseEntity<Void> update(@PathVariable Long idPatient, @RequestBody @Valid PatientRequest request) {
+        service.updatePatient(idPatient, request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Object> findById(@RequestBody final Patient patients) {
-        service.delete(patients);
-        return ResponseEntity<>(HttpStatus.OK);
-
-/*    @GetMapping("/cpf")
-    public ResponseEntity<Object> findByCpf(@RequestParam String cpf) {
-        return ResponseEntity.ok(service.getByCpf(cpf));
+    @DeleteMapping("/{idPatient}")
+    public ResponseEntity<Void> delete(@PathVariable Long idPatient) {
+        service.delete(idPatient);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/name")
-    public ResponseEntity<Object> findByName(@RequestParam String name) {
-        return ResponseEntity.ok(service.getByName(name));
-    }*/
+    @GetMapping("/{idPatient}")
+    public ResponseEntity<Patient> getById(@PathVariable Long idPatient) {
+        Patient patient = service.getById(idPatient);
+        return new ResponseEntity<>(patient, HttpStatus.OK);
+    }
 
     @GetMapping
-    public Page<Patient> list(Pageable pageable) {
-        return service.list(pageable);
+    public ResponseEntity<Page<Patient>> list(Pageable pageable) {
+        Page<Patient> patientList = service.list(pageable);
+        return new ResponseEntity<>(patientList, HttpStatus.OK);
     }
 }
