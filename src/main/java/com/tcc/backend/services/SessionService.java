@@ -1,66 +1,85 @@
 package com.tcc.backend.services;
 
+import com.tcc.backend.dtos.session.SessionRequest;
 import com.tcc.backend.models.Patient;
+import com.tcc.backend.models.Psychologist;
 import com.tcc.backend.models.Session;
-import com.tcc.backend.models.User;
+import com.tcc.backend.repositories.PatientRepository;
+import com.tcc.backend.repositories.PsychologistRepository;
 import com.tcc.backend.repositories.SessionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
-import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 @Transactional
 public class SessionService {
 
+    private final SessionRepository sessionRepository;
+    private final PatientRepository patientRepository;
+    private final PsychologistRepository psychologistRepository;
+
     @Autowired
-    public SessionService(final SessionRepository repository, SessionRepository sessionRepository) {
-        this.repository = repository;
+    public SessionService(SessionRepository sessionRepository, PatientRepository patientRepository, PsychologistRepository psychologistRepository) {
+        this.sessionRepository = sessionRepository;
+        this.patientRepository = patientRepository;
+        this.psychologistRepository = psychologistRepository;
     }
 
-    private final SessionRepository repository;
+    public Session create(SessionRequest sessionRequest) {
+        Patient patient = patientRepository.findById(sessionRequest.getPatientId())
+                .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + sessionRequest.getPatientId()));
 
-    public Session create(final Session session) {
-        Patient patient = session.getIdpatient();
-        //MELHORAR
-/*        Optional<Session> lastSession = repository.findTopByPatientOrderBySessionNumberDesc(patient.g);
-        Long newSessionNumber = lastSession.map(last -> last.getSessionNumber() + 1).orElse(1L);
-        session.setSessionNumber(newSessionNumber);*/
+        Psychologist psychologist = psychologistRepository.findById(sessionRequest.getPsychologistId())
+                .orElseThrow(() -> new IllegalArgumentException("Psicólogo não encontrado com o ID: " + sessionRequest.getPsychologistId()));
 
-        final Session newSession = repository.save(session);
-        return newSession;
+        long sessionNumber = sessionRepository.countByIdPatient(patient) + 1;
+
+        Session session = Session.builder()
+                .idPatient(patient)
+                .idPsychologist(psychologist)
+                .sessionNumber(sessionNumber)
+                .sessionDate(sessionRequest.getSessionDate())
+                .reason(sessionRequest.getReason())
+                .description(sessionRequest.getDescription())
+                .build();
+
+        return sessionRepository.save(session);
     }
 
-    public Session update(final Session session) {
-        return repository.save(session);
+
+    public Session update(Long idSession, SessionRequest sessionRequest) {
+        Session existingSession = getById(idSession);
+
+        Patient patient = patientRepository.findById(sessionRequest.getPatientId())
+                .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + sessionRequest.getPatientId()));
+
+        Psychologist psychologist = psychologistRepository.findById(sessionRequest.getPsychologistId())
+                .orElseThrow(() -> new IllegalArgumentException("Psicólogo não encontrado com o ID: " + sessionRequest.getPsychologistId()));
+
+        existingSession.setSessionDate(sessionRequest.getSessionDate());
+        existingSession.setReason(sessionRequest.getReason());
+        existingSession.setDescription(sessionRequest.getDescription());
+        existingSession.setIdPatient(patient);
+        existingSession.setIdPsychologist(psychologist);
+
+        return sessionRepository.save(existingSession);
     }
 
-    public Optional<Session> getById(final Long id) {
-        return repository.findById(id);
+    public void delete(Long idSession) {
+        Session session = sessionRepository.findById(idSession)
+                .orElseThrow(() -> new IllegalArgumentException("Sessão não encontrada com o ID: " + idSession));
+        sessionRepository.delete(session);
     }
 
-    public Optional<Session> getByNamePsychologist(String namePsychologist) {
-        return repository.findByNamePsychologist(namePsychologist);
-    }
-
-    public Optional<Session> getByNamePatient(final String namePatient) {
-        return repository.findByNamePatient(namePatient);
-    }
-
-    public Optional<Session> getBySessionDate(final LocalDate sessionDate) {
-        return repository.findBySessionDate(sessionDate);
-    }
-
-    public Optional<Session> getBySessionNumber(final Long sessionNumber) {
-        return repository.findBySessionNumber(sessionNumber);
+    public Session getById(Long idSession) {
+        return sessionRepository.findById(idSession)
+                .orElseThrow(() -> new IllegalArgumentException("Sessão não encontrada com o ID: " + idSession));
     }
 
     public Page<Session> list(Pageable pageable) {
-        return repository.findAll(pageable);
+        return sessionRepository.findAll(pageable);
     }
 }

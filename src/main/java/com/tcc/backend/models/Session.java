@@ -20,19 +20,24 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_ses")
     private Long idSession;
+
     @Column(name = "numb_ses")
     private Long sessionNumber;
-    @Column(name = "date_ses")
+
+    @Column(name = "date_ses", nullable = false)
     private LocalDate sessionDate;
-    @Column(name = "reas_ses")
+
+    @Column(name = "reas_ses", nullable = false)
     private String reason;
+
     @Column(name = "desc_ses")
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "id_Patient")
-    private Patient idpatient;
+    @JoinColumn(name = "id_patient", referencedColumnName = "id_patient")
+    private Patient idPatient;
+
     @ManyToOne
-    @JoinColumn(name = "id_psychologist")
-    private User idPsychologist;
+    @JoinColumn(name = "id_psychologist", referencedColumnName = "id_psychologist")
+    private Psychologist idPsychologist;
 }
