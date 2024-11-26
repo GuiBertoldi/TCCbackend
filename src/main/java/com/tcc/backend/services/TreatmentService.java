@@ -1,40 +1,68 @@
 package com.tcc.backend.services;
 
+import com.tcc.backend.dtos.treatment.TreatmentRequest;
+import com.tcc.backend.models.Patient;
 import com.tcc.backend.models.Treatment;
+import com.tcc.backend.repositories.PatientRepository;
 import com.tcc.backend.repositories.TreatmentRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
-import java.util.Optional;
 
 @Service
 @Transactional
 public class TreatmentService {
 
+    private final TreatmentRepository treatmentRepository;
+    private final PatientRepository patientRepository;
+
     @Autowired
-    public TreatmentService(TreatmentRepository repository) {
-        this.repository = repository;
+    public TreatmentService(TreatmentRepository treatmentRepository, PatientRepository patientRepository) {
+        this.treatmentRepository = treatmentRepository;
+        this.patientRepository = patientRepository;
     }
 
-    private final TreatmentRepository repository;
+    public Treatment create(TreatmentRequest request) {
+        Patient patient = patientRepository.findById(request.getPatientId())
+                .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + request.getPatientId()));
 
-    public Treatment create(final Treatment treatment){
-        final Treatment newTreatment = repository.save(treatment);
-        return newTreatment;
+        Treatment treatment = Treatment.builder()
+                .idPatient(patient)
+                .medicine(request.getMedicine())
+                .startTreatment(request.getStartTreatment())
+                .endTreatment(request.getEndTreatment())
+                .build();
+
+        return treatmentRepository.save(treatment);
     }
 
-    public Treatment update(final Treatment treatment){
-        return repository.save(treatment);
+    public Treatment update(Long idTreatment, TreatmentRequest request) {
+        Treatment existingTreatment = getById(idTreatment);
+
+        Patient patient = patientRepository.findById(request.getPatientId())
+                .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + request.getPatientId()));
+
+        existingTreatment.setIdPatient(patient);
+        existingTreatment.setMedicine(request.getMedicine());
+        existingTreatment.setStartTreatment(request.getStartTreatment());
+        existingTreatment.setEndTreatment(request.getEndTreatment());
+
+        return treatmentRepository.save(existingTreatment);
     }
 
-    public Optional<Treatment> findById(final Long idTreatment){
-        return repository.findById(idTreatment);
+    public void delete(Long idTreatment) {
+        Treatment treatment = getById(idTreatment);
+        treatmentRepository.delete(treatment);
     }
+
+    public Treatment getById(Long idTreatment) {
+        return treatmentRepository.findById(idTreatment)
+                .orElseThrow(() -> new IllegalArgumentException("Tratamento não encontrado com o ID: " + idTreatment));
+    }
+
     public Page<Treatment> list(Pageable pageable) {
-        return repository.findAll(pageable);
+        return treatmentRepository.findAll(pageable);
     }
 }

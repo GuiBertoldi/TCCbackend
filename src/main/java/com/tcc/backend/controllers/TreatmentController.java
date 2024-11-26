@@ -1,7 +1,9 @@
 package com.tcc.backend.controllers;
 
+import com.tcc.backend.dtos.treatment.TreatmentRequest;
 import com.tcc.backend.models.Treatment;
 import com.tcc.backend.services.TreatmentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,28 +12,43 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/treatment")
+@RequestMapping("/treatments")
 public class TreatmentController {
-
-    @Autowired
-    public TreatmentController(final TreatmentService service) {
-        this.service = service;
-    }
 
     private final TreatmentService service;
 
-    @PostMapping("create")
-    public ResponseEntity<Object> create(@RequestBody final Treatment treatment) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(treatment));
+    @Autowired
+    public TreatmentController(TreatmentService service) {
+        this.service = service;
     }
 
-    @PutMapping("update")
-    public ResponseEntity<Object> update(@RequestBody final Treatment treatment) {
-        return ResponseEntity.ok(service.update(treatment));
+    @PostMapping
+    public ResponseEntity<Treatment> create(@RequestBody @Valid TreatmentRequest request) {
+        Treatment treatment = service.create(request);
+        return new ResponseEntity<>(treatment, HttpStatus.CREATED);
     }
 
-    @GetMapping("list")
-    public Page<Treatment> list(Pageable pageable) {
-        return service.list(pageable);
+    @PutMapping("/{idTreatment}")
+    public ResponseEntity<Void> update(@PathVariable Long idTreatment, @RequestBody @Valid TreatmentRequest request) {
+        service.update(idTreatment, request);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{idTreatment}")
+    public ResponseEntity<Void> delete(@PathVariable Long idTreatment) {
+        service.delete(idTreatment);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/{idTreatment}")
+    public ResponseEntity<Treatment> getById(@PathVariable Long idTreatment) {
+        Treatment treatment = service.getById(idTreatment);
+        return new ResponseEntity<>(treatment, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<Treatment>> list(Pageable pageable) {
+        Page<Treatment> treatments = service.list(pageable);
+        return new ResponseEntity<>(treatments, HttpStatus.OK);
     }
 }

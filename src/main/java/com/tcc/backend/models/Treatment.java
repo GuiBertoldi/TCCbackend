@@ -20,15 +20,17 @@ public class Treatment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_tre")
     private Long idTreatment;
-    @Column(name = "med")
+
+    @Column(name = "med_tre", nullable = false)
     private String medicine;
-    @Column(name = "start_tre")
-    private LocalDate StartTreatment;
-    @Column(name = "end_tre")
-    private LocalDate EndTreatment;
+
+    @Column(name = "start_tre", nullable = false)
+    private LocalDate startTreatment;
+
+    @Column(name = "end_tre", nullable = true)
+    private LocalDate endTreatment;
 
     @ManyToOne
-    @JoinColumn(name = "idPatient")
-    private Patient idpatient;
-
+    @JoinColumn(name = "id_patient", referencedColumnName = "id_patient", nullable = false)
+    private Patient idPatient;
 }
