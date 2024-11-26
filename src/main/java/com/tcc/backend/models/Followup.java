@@ -11,21 +11,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "followUp")
-public class FollowUp {
+@Table(name = "follow_up")
+public class Followup {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_fol")
     private Long idFollowUp;
-    @Column(name = "doc_name")
+
+    @Column(name = "doc_name", nullable = false)
     private String professionalName;
-    @Column(name = "med_spec")
-    private String pro_specialty;
-    @Column(name = "pro_spec")
+
+    @Column(name = "pro_spec", nullable = false)
     private String professionalSpecialty;
 
     @ManyToOne
-    @JoinColumn(name = "idPatient")
-    private Patient idpatient;
+    @JoinColumn(name = "id_patient", referencedColumnName = "id_patient", nullable = false)
+    private Patient idPatient;
 }
