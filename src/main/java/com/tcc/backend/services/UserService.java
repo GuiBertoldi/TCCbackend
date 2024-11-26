@@ -7,6 +7,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,11 +16,19 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(final UserRepository repository) {
+    public UserService(UserRepository repository) {
         this.repository = repository;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
+
+    public boolean validatePassword(String rawPassword, String storedPassword) {
+        return passwordEncoder.matches(rawPassword, storedPassword) ||
+                rawPassword.equals(storedPassword);
+    }
+
 
     public User create(UserRequest request) {
         final User newUser = repository.save(
@@ -26,7 +36,7 @@ public class UserService {
                         .type(request.getType())
                         .name(request.getName())
                         .email(request.getEmail())
-                        .password(request.getPassword())
+                        .password(passwordEncoder.encode(request.getPassword()))
                         .cpf(request.getCpf())
                         .phone(request.getPhone())
                         .cep(request.getCep())
@@ -48,7 +58,7 @@ public class UserService {
                         .type(request.getType())
                         .name(request.getName())
                         .email(request.getEmail())
-                        .password(request.getPassword())
+                        .password(passwordEncoder.encode(request.getPassword()))
                         .cpf(request.getCpf())
                         .phone(request.getPhone())
                         .cep(request.getCep())
@@ -75,6 +85,12 @@ public class UserService {
     public User getByCpf(String cpf) {
         return repository.findByCpf(cpf).orElseThrow(() ->
                 new IllegalArgumentException("Usuário com CPF não encontrado."));
+    }
+
+    public User getByEmail(String email) {
+        return repository.findByEmail(email).orElseThrow(() ->
+                new IllegalArgumentException("Usuário com email não encontrado.")
+        );
     }
 
     public Page<User> list(String name, Pageable pageable) {

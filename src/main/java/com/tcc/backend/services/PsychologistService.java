@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,11 +20,13 @@ public class PsychologistService {
 
     private final PsychologistRepository repository;
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public PsychologistService(PsychologistRepository repository, UserService userService) {
         this.repository = repository;
         this.userService = userService;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     public Psychologist createPsychologist(final PsychologistRequest psychologistRequest) {
@@ -30,14 +34,13 @@ public class PsychologistService {
                 .type(UserType.PSICOLOGO)
                 .name(psychologistRequest.getName())
                 .email(psychologistRequest.getEmail())
-                .password(psychologistRequest.getPassword()) // Senha obrigatória
+                .password(passwordEncoder.encode(psychologistRequest.getPassword()))
                 .cpf(psychologistRequest.getCpf())
                 .phone(psychologistRequest.getPhone())
                 .build();
 
         User createdUser = userService.create(userRequest);
 
-        // Criar psicólogo
         Psychologist psychologist = Psychologist.builder()
                 .idUser(createdUser)
                 .crp(psychologistRequest.getCrp())
@@ -54,7 +57,8 @@ public class PsychologistService {
                 .type(UserType.PSICOLOGO)
                 .name(psychologistRequest.getName())
                 .email(psychologistRequest.getEmail())
-                .password(psychologistRequest.getPassword()) // Senha obrigatória
+                .password(psychologistRequest.getPassword())
+                .password(passwordEncoder.encode(psychologistRequest.getPassword()))
                 .cpf(psychologistRequest.getCpf())
                 .phone(psychologistRequest.getPhone())
                 .build();
