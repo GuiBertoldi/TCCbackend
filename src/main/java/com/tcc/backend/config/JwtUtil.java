@@ -15,7 +15,7 @@ public class JwtUtil {
 
     private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    public String extractEmail(String token) {
+    public String extractIdUser(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 

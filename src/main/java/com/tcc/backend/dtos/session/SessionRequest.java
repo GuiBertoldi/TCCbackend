@@ -19,7 +19,7 @@ public class SessionRequest {
     private Long patientId;
 
     @NotNull(message = "O ID do psicólogo é obrigatório!")
-    private Long psychologistId;
+    private Long idUser;
 
     @NotNull(message = "A data da sessão é obrigatória!")
     private LocalDate sessionDate;

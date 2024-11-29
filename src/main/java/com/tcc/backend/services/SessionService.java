@@ -32,8 +32,8 @@ public class SessionService {
         Patient patient = patientRepository.findById(sessionRequest.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + sessionRequest.getPatientId()));
 
-        Psychologist psychologist = psychologistRepository.findById(sessionRequest.getPsychologistId())
-                .orElseThrow(() -> new IllegalArgumentException("Psicólogo não encontrado com o ID: " + sessionRequest.getPsychologistId()));
+        Psychologist psychologist = psychologistRepository.findByIdUserId(sessionRequest.getIdUser())
+                .orElseThrow(() -> new IllegalArgumentException("Psicólogo não encontrado com o ID: " + sessionRequest.getIdUser()));
 
         long sessionNumber = sessionRepository.countByIdPatient(patient) + 1;
 
@@ -56,8 +56,8 @@ public class SessionService {
         Patient patient = patientRepository.findById(sessionRequest.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + sessionRequest.getPatientId()));
 
-        Psychologist psychologist = psychologistRepository.findById(sessionRequest.getPsychologistId())
-                .orElseThrow(() -> new IllegalArgumentException("Psicólogo não encontrado com o ID: " + sessionRequest.getPsychologistId()));
+        Psychologist psychologist = psychologistRepository.findById(sessionRequest.getIdUser())
+                .orElseThrow(() -> new IllegalArgumentException("Psicólogo não encontrado com o ID: " + sessionRequest.getIdUser()));
 
         existingSession.setSessionDate(sessionRequest.getSessionDate());
         existingSession.setReason(sessionRequest.getReason());

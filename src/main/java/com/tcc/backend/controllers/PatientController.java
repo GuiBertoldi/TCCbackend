@@ -46,9 +46,16 @@ public class PatientController {
         return new ResponseEntity<>(patient, HttpStatus.OK);
     }
 
+    @GetMapping("/search/{idUser}")
+    public ResponseEntity<Patient> findByUserId(@PathVariable Long idUser) {
+        Patient patient = service.findByUserId(idUser);
+        return new ResponseEntity<>(patient, HttpStatus.OK);
+    }
+
     @GetMapping
     public ResponseEntity<Page<Patient>> list(Pageable pageable) {
         Page<Patient> patientList = service.list(pageable);
         return new ResponseEntity<>(patientList, HttpStatus.OK);
     }
+
 }

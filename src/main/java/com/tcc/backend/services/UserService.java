@@ -1,6 +1,7 @@
 package com.tcc.backend.services;
 
 import com.tcc.backend.dtos.user.UserRequest;
+import com.tcc.backend.enums.UserType;
 import com.tcc.backend.models.User;
 import com.tcc.backend.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -10,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -31,34 +34,54 @@ public class UserService {
 
 
     public User create(UserRequest request) {
-        final User newUser = repository.save(
-                User.builder()
-                        .type(request.getType())
-                        .name(request.getName())
-                        .email(request.getEmail())
-                        .password(passwordEncoder.encode(request.getPassword()))
-                        .cpf(request.getCpf())
-                        .phone(request.getPhone())
-                        .cep(request.getCep())
-                        .city(request.getCity())
-                        .neighborhood(request.getNeighborhood())
-                        .street(request.getStreet())
-                        .number(request.getNumber())
-                        .complement(request.getComplement())
-                        .build());
-        return newUser;
+        String encodedPassword = null;
+
+        if (!UserType.PACIENTE.equals(request.getType())) {
+            if (request.getPassword() == null || request.getPassword().isEmpty()) {
+                throw new IllegalArgumentException("Senha não pode ser nula para este tipo de usuário.");
+            }
+            encodedPassword = passwordEncoder.encode(request.getPassword());
+        }
+
+        User newUser = User.builder()
+                .type(request.getType())
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(encodedPassword)
+                .cpf(request.getCpf())
+                .phone(request.getPhone())
+                .cep(request.getCep())
+                .city(request.getCity())
+                .neighborhood(request.getNeighborhood())
+                .street(request.getStreet())
+                .number(request.getNumber())
+                .complement(request.getComplement())
+                .build();
+
+        return repository.save(newUser);
     }
+
 
     public User update(Long idUser, UserRequest request) {
         User user = repository.findById(idUser).orElseThrow(() ->
                 new IllegalArgumentException("Usuário não encontrado."));
+
+        String encodedPassword = user.getPassword();
+
+        if (!"PACIENTE".equalsIgnoreCase(request.getType().toString())) {
+            if (request.getPassword() == null) {
+                throw new IllegalArgumentException("Senha não pode ser nula para este tipo de usuário.");
+            }
+            encodedPassword = passwordEncoder.encode(request.getPassword());
+        }
+
         User updatedUser = repository.save(
                 User.builder()
                         .idUser(user.getIdUser())
                         .type(request.getType())
                         .name(request.getName())
                         .email(request.getEmail())
-                        .password(passwordEncoder.encode(request.getPassword()))
+                        .password(encodedPassword)
                         .cpf(request.getCpf())
                         .phone(request.getPhone())
                         .cep(request.getCep())
@@ -68,8 +91,10 @@ public class UserService {
                         .number(request.getNumber())
                         .complement(request.getComplement())
                         .build());
+
         return updatedUser;
     }
+
 
     public void delete(Long idUser) {
         User user = repository.findById(idUser).orElseThrow(() ->
@@ -91,6 +116,10 @@ public class UserService {
         return repository.findByEmail(email).orElseThrow(() ->
                 new IllegalArgumentException("Usuário com email não encontrado.")
         );
+    }
+
+    public List<User> getUsersByType(UserType type) {
+        return repository.findByType(type);
     }
 
     public Page<User> list(String name, Pageable pageable) {

@@ -106,6 +106,11 @@ public class PatientService {
                 new IllegalArgumentException("Paciente não encontrado com o ID: " + idPatient));
     }
 
+    public Patient findByUserId(Long idUser) {
+        return repository.findByUserId(idUser).orElseThrow(() ->
+                new IllegalArgumentException("Paciente não encontrado com o ID de usuário: " + idUser));
+    }
+
     public Page<Patient> list(Pageable pageable) {
         return repository.findAll(pageable);
     }

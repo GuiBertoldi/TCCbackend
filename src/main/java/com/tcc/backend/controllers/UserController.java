@@ -1,6 +1,7 @@
 package com.tcc.backend.controllers;
 
 import com.tcc.backend.dtos.user.UserRequest;
+import com.tcc.backend.enums.UserType;
 import com.tcc.backend.models.User;
 import com.tcc.backend.services.UserService;
 import jakarta.validation.Valid;
@@ -10,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -40,8 +43,8 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/{idUser}")
-    public ResponseEntity<User> getById(@PathVariable Long idUser) {
+    @GetMapping("/search/{idUser}")
+    public ResponseEntity<User> getById(@PathVariable(name = "idUser") Long idUser) {
         User user = service.getById(idUser);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -56,5 +59,11 @@ public class UserController {
     public ResponseEntity<Page<User>> list(@RequestParam(required = false) String name, Pageable pageable) {
         Page<User> userList = service.list(name, pageable);
         return new ResponseEntity<>(userList, HttpStatus.OK);
+    }
+
+    @GetMapping("/patients")
+    public ResponseEntity<List<User>> getPatients() {
+        List<User> patients = service.getUsersByType(UserType.PACIENTE);
+        return ResponseEntity.ok(patients);
     }
 }

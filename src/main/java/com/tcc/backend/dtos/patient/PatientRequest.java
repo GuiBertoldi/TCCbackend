@@ -1,7 +1,6 @@
 package com.tcc.backend.dtos.patient;
 
 import com.tcc.backend.dtos.user.UserRequest;
-import com.tcc.backend.models.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
