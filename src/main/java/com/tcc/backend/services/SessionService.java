@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class SessionService {
@@ -77,6 +79,10 @@ public class SessionService {
     public Session getById(Long idSession) {
         return sessionRepository.findById(idSession)
                 .orElseThrow(() -> new IllegalArgumentException("Sessão não encontrada com o ID: " + idSession));
+    }
+
+    public List<Session> getSessionsByUserId(Long userId) {
+        return sessionRepository.findSessionsByUserId(userId);
     }
 
     public Page<Session> list(Pageable pageable) {

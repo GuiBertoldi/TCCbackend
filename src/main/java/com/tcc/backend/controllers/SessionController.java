@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+
 @RestController
 @RequestMapping("/sessions")
 public class SessionController {
@@ -44,6 +47,12 @@ public class SessionController {
     public ResponseEntity<Session> getById(@PathVariable Long idSession) {
         Session session = service.getById(idSession);
         return new ResponseEntity<>(session, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Session>> getSessionsByUserId(@PathVariable Long userId) {
+        List<Session> sessions = service.getSessionsByUserId(userId);
+        return ResponseEntity.ok(sessions);
     }
 
     @GetMapping
