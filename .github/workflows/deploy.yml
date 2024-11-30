@@ -41,7 +41,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=GuiBertoldi_TCCbackend
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=GuiBertoldi_tccbackend
 
 build:
   name: Build Docker
@@ -65,10 +65,10 @@ build:
       run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build Docker image
-      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/TCCbackend .
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/tccbackend .
 
     - name: Push Docker image
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/TCCbackend
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/tccbackend
 
   deploy:
     name: Deploy to AWS
@@ -77,10 +77,10 @@ build:
 
     steps:
       - name: Pull image from Docker Hub
-        run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/TCCbackend:latest
+        run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/tccbackend:latest
 
       - name: Remove existing Docker container
-        run: sudo docker rm -f TCCbackend
+        run: sudo docker rm -f tccbackend
 
       - name: Run Docker container
-        run: sudo docker run -d -p 8080:8080 -e 'DATABASE_USERNAME=${{secrets.DATABASE_USERNAME}}' -e 'DATABASE_PASSWORD=${{secrets.DATABASE_PASSWORD}}' -e 'DATABASE_URL=${{secrets.DATABASE_URL}}' -e 'JWT_ENCODING=${{secrets.JWT_ENCODING}}' --name TCCbackend ${{secrets.DOCKER_USERNAME}}/TCCbackend:latest
+        run: sudo docker run -d -p 8080:8080 -e 'DATABASE_USERNAME=${{secrets.DATABASE_USERNAME}}' -e 'DATABASE_PASSWORD=${{secrets.DATABASE_PASSWORD}}' -e 'DATABASE_URL=${{secrets.DATABASE_URL}}' -e 'JWT_ENCODING=${{secrets.JWT_ENCODING}}' --name tccbackend ${{secrets.DOCKER_USERNAME}}/tccbackend:latest
