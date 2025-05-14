@@ -31,7 +31,7 @@ public class SessionService {
     }
 
     public Session create(SessionRequest sessionRequest) {
-        Patient patient = patientRepository.findById(sessionRequest.getPatientId())
+        Patient patient = patientRepository.findByUserId(sessionRequest.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + sessionRequest.getPatientId()));
 
         Psychologist psychologist = psychologistRepository.findByIdUserId(sessionRequest.getIdUser())
