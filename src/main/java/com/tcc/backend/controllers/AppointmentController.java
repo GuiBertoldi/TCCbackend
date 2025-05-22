@@ -1,5 +1,6 @@
 package com.tcc.backend.controllers;
 
+import com.tcc.backend.dtos.appointment.AppointmentRequest;
 import com.tcc.backend.models.Appointment;
 import com.tcc.backend.services.AppointmentService;
 import lombok.RequiredArgsConstructor;
@@ -40,13 +41,13 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public Appointment create(@RequestBody Appointment appointment) {
-        return service.create(appointment);
+    public Appointment create(@RequestBody AppointmentRequest appointmentRequest) {
+        return service.create(appointmentRequest);
     }
 
     @PutMapping("/{id}")
-    public Appointment update(@PathVariable Long id, @RequestBody Appointment appointment) {
-        return service.update(id, appointment);
+    public Appointment update(@PathVariable Long id, @RequestBody AppointmentRequest appointmentRequest) {
+        return service.update(id, appointmentRequest);
     }
 
     @DeleteMapping("/{id}")
