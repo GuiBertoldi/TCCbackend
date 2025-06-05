@@ -8,8 +8,8 @@ import java.time.LocalTime;
 
 @Data
 public class AppointmentRequest {
-    private Long patientId;
-    private Long psychologistId;
+    private Long idPatient;
+    private Long idPsychologist;
     private LocalDate date;
     private LocalTime time;
     private Integer duration;

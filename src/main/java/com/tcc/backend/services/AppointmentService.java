@@ -5,41 +5,32 @@ import com.tcc.backend.models.Appointment;
 import com.tcc.backend.models.Patient;
 import com.tcc.backend.models.Psychologist;
 import com.tcc.backend.repositories.AppointmentRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.tcc.backend.repositories.PatientRepository;
 import com.tcc.backend.repositories.PsychologistRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
-
 @Service
-@RequiredArgsConstructor
 public class AppointmentService {
 
     private final AppointmentRepository repository;
     private final PatientRepository patientRepository;
     private final PsychologistRepository psychologistRepository;
 
-    @Transactional
-    public Appointment create(AppointmentRequest request) {
-        Patient patient = patientRepository.findById(request.getPatientId())
-                .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado"));
+    @Autowired
+    public AppointmentService(AppointmentRepository repository, PatientRepository patientRepository, PsychologistRepository psychologistRepository) {
+        this.repository = repository;
+        this.patientRepository = patientRepository;
+        this.psychologistRepository = psychologistRepository;
+    }
 
-        Psychologist psychologist = psychologistRepository.findById(request.getPsychologistId())
-                .orElseThrow(() -> new IllegalArgumentException("Psicólogo não encontrado"));
-
-        List<Appointment> conflicts = repository.findByPsychologist_IdPsychologistAndDateBetween(
-                psychologist.getIdPsychologist(), request.getDate(), request.getDate());
-
-        boolean hasConflict = conflicts.stream()
-                .anyMatch(a -> a.getTime().equals(request.getTime()));
-
-        if (hasConflict) {
-            throw new IllegalArgumentException("Conflito de horário para o psicólogo.");
-        }
+    public Appointment create(AppointmentRequest request) throws Exception {
+        Patient patient = patientRepository.findById(request.getIdPatient()).orElseThrow(() -> new Exception("Paciente não encontrado"));
+        Psychologist psychologist = psychologistRepository.findById(request.getIdPsychologist()).orElseThrow(() -> new Exception("Psicólogo não encontrado"));
 
         Appointment appointment = Appointment.builder()
                 .patient(patient)
@@ -50,12 +41,11 @@ public class AppointmentService {
                 .status(request.getStatus())
                 .notes(request.getNotes())
                 .build();
-
         return repository.save(appointment);
     }
 
 
-    @Transactional
+    /*@Transactional
     public Appointment update(Long id, AppointmentRequest request) {
         Appointment existing = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado"));
@@ -69,15 +59,15 @@ public class AppointmentService {
         existing.setDate(request.getDate());
         existing.setTime(request.getTime());
         existing.setDuration(request.getDuration());
-        existing.setPatient(patient);
-        existing.setPsychologist(psychologist);
+        existing.setIdPatient(patient);
+        existing.setIdPsychologist(psychologist);
         existing.setStatus(request.getStatus());
         existing.setNotes(request.getNotes());
 
         return repository.save(existing);
-    }
+    }*/
 
-    @Transactional(readOnly = true)
+   /* @Transactional(readOnly = true)
     public Appointment findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado"));
@@ -92,16 +82,16 @@ public class AppointmentService {
     public List<Appointment> findByPsychologistAndPeriod(Long idPsychologist,
                                                          LocalDate start,
                                                          LocalDate end) {
-        return repository.findByPsychologist_IdPsychologistAndDateBetween(idPsychologist, start, end);
+        return repository.findByIdPsychologist_IdPsychologistAndDateBetween(idPsychologist, start, end);
     }
 
     @Transactional(readOnly = true)
     public List<Appointment> findByPatient(Long patientId) {
-        return repository.findByPatient_IdPatient(patientId);
+        return repository.findByIdPatient_IdPatient(patientId);
     }
 
     @Transactional
     public void delete(Long id) {
         repository.deleteById(id);
-    }
+    }*/
 }

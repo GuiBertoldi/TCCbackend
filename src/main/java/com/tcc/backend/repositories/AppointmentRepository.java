@@ -9,7 +9,6 @@ import java.util.List;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
-
-    List<Appointment> findByPsychologist_IdPsychologistAndDateBetween(Long idPsychologist, LocalDate start, LocalDate end);
-    List<Appointment> findByPatient_IdPatient(Long idPatient);
+    //List<Appointment> findByIdPsychologist_IdPsychologistAndDateBetween(Long idPsychologist, LocalDate start, LocalDate end);
+    //List<Appointment> findByIdPatient_IdPatient(Long idPatient);
 }

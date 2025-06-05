@@ -1,57 +1,33 @@
 package com.tcc.backend.controllers;
 
 import com.tcc.backend.dtos.appointment.AppointmentRequest;
+import com.tcc.backend.dtos.appointment.AppointmentResponse;
 import com.tcc.backend.models.Appointment;
 import com.tcc.backend.services.AppointmentService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/appointments")
-@RequiredArgsConstructor
 public class AppointmentController {
 
     private final AppointmentService service;
 
-    @GetMapping
-    public List<Appointment> list(
-            @RequestParam(required = false) Long psychologistId,
-            @RequestParam(required = false) Long patientId,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
-    ) {
-        if (psychologistId != null && from != null && to != null) {
-            return service.findByPsychologistAndPeriod(psychologistId, from, to);
-        } else if (patientId != null) {
-            return service.findByPatient(patientId);
-        } else {
-            return service.findAll();
-        }
-    }
-
-    @GetMapping("/{id}")
-    public Appointment get(@PathVariable Long id) {
-        return service.findById(id);
+    @Autowired
+    public AppointmentController(AppointmentService service) {
+        this.service = service;
     }
 
     @PostMapping
-    public Appointment create(@RequestBody AppointmentRequest appointmentRequest) {
-        return service.create(appointmentRequest);
+    public ResponseEntity<AppointmentResponse> create(@RequestBody @Valid AppointmentRequest request) throws Exception {
+        Appointment appointment = service.create(request);
+        return new ResponseEntity<>(AppointmentResponse.fromEntity(appointment), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public Appointment update(@PathVariable Long id, @RequestBody AppointmentRequest appointmentRequest) {
-        return service.update(id, appointmentRequest);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
-    }
 }
