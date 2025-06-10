@@ -16,25 +16,30 @@ public class Appointment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_app")
+    private Long idAppointment;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
+    @JoinColumn(name = "id_patient", nullable = false)
     private Patient patient;
 
     @ManyToOne
-    @JoinColumn(name = "psychologist_id", nullable = false)
+    @JoinColumn(name = "id_psychologist", nullable = false)
     private Psychologist psychologist;
 
+    @Column(name = "date_app")
     private LocalDate date;
 
+    @Column(name = "time_app")
     private LocalTime time;
 
+    @Column(name = "duration_app")
     private Integer duration;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status_app")
     private AppointmentStatus status;
 
-    @Column(length = 1024)
+    @Column(name = "notes_app", length = 1024)
     private String notes;
 }
