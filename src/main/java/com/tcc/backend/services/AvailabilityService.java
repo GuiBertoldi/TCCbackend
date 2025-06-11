@@ -1,4 +1,3 @@
-// AvailabilityService.java
 package com.tcc.backend.services;
 
 import com.tcc.backend.dtos.availability.AvailabilityRequest;
@@ -25,15 +24,15 @@ public class AvailabilityService {
     }
 
     public AvailabilityResponse create(AvailabilityRequest request) throws Exception {
-        Psychologist p = psychologistRepository.findById(request.getIdPsychologist())
+        Psychologist psychologist = psychologistRepository.findById(request.getIdPsychologist())
                 .orElseThrow(() -> new Exception("Psicólogo não encontrado"));
-        PsychologistAvailability a = PsychologistAvailability.builder()
-                .psychologist(p)
+        PsychologistAvailability availability = PsychologistAvailability.builder()
+                .psychologist(psychologist)
                 .dayOfWeek(request.getDayOfWeek())
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
                 .build();
-        return AvailabilityResponse.fromEntity(repository.save(a));
+        return AvailabilityResponse.fromEntity(repository.save(availability));
     }
 
     public AvailabilityResponse update(Long id, AvailabilityRequest request) throws Exception {

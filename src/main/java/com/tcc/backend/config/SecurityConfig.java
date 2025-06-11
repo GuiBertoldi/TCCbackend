@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/psychologists/**").authenticated()
                         .requestMatchers("/sessions/**").authenticated()
                         .requestMatchers("/treatments/**").authenticated()
+                        .requestMatchers("/Availability/**").authenticated()
                         .requestMatchers("/users/**").authenticated()
                         .anyRequest().authenticated()
                 )
