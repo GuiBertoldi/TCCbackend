@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class FollowupService {
@@ -25,7 +27,7 @@ public class FollowupService {
     }
 
     public Followup create(FollowupRequest request) {
-        Patient patient = patientRepository.findById(request.getPatientId())
+        Patient patient = patientRepository.findByUserId(request.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + request.getPatientId()));
 
         Followup followup = Followup.builder()
@@ -40,7 +42,7 @@ public class FollowupService {
     public Followup update(Long idFollowup, FollowupRequest request) {
         Followup existingFollowup = getById(idFollowup);
 
-        Patient patient = patientRepository.findById(request.getPatientId())
+        Patient patient = patientRepository.findByUserId(request.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + request.getPatientId()));
 
         existingFollowup.setIdPatient(patient);
@@ -65,6 +67,10 @@ public class FollowupService {
                 .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + patientId));
         return followupRepository.findByIdPatient(patient)
                 .orElseThrow(() -> new IllegalArgumentException("Acompanhamento não encontrado para o paciente informado."));
+    }
+
+    public List<Followup> getFollowupsByUserId(Long userId) {
+        return followupRepository.findFollowupsByUserId(userId);
     }
 
     public Page<Followup> listFollowups(Pageable pageable) {

@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class TreatmentService {
@@ -25,7 +27,7 @@ public class TreatmentService {
     }
 
     public Treatment create(TreatmentRequest request) {
-        Patient patient = patientRepository.findById(request.getPatientId())
+        Patient patient = patientRepository.findByUserId(request.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + request.getPatientId()));
 
         Treatment treatment = Treatment.builder()
@@ -41,7 +43,7 @@ public class TreatmentService {
     public Treatment update(Long idTreatment, TreatmentRequest request) {
         Treatment existingTreatment = getById(idTreatment);
 
-        Patient patient = patientRepository.findById(request.getPatientId())
+        Patient patient = patientRepository.findByUserId(request.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + request.getPatientId()));
 
         existingTreatment.setIdPatient(patient);
@@ -60,6 +62,10 @@ public class TreatmentService {
     public Treatment getById(Long idTreatment) {
         return treatmentRepository.findById(idTreatment)
                 .orElseThrow(() -> new IllegalArgumentException("Tratamento não encontrado com o ID: " + idTreatment));
+    }
+
+    public List<Treatment> getTreatmentsByUserId(Long userId) {
+        return treatmentRepository.findTreatmentsByUserId(userId);
     }
 
     public Page<Treatment> list(Pageable pageable) {

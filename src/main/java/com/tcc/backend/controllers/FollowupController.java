@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/followups")
 public class FollowupController {
@@ -43,6 +45,12 @@ public class FollowupController {
     @GetMapping("/{idFollowup}")
     public ResponseEntity<Followup> getById(@PathVariable Long idFollowup) {
         Followup followup = service.getById(idFollowup);
+        return new ResponseEntity<>(followup, HttpStatus.OK);
+    }
+
+    @GetMapping("/patient/{idPatient}")
+    public ResponseEntity<List<Followup>> findByUserId(@PathVariable Long idPatient) {
+        List<Followup> followup = service.getFollowupsByUserId(idPatient);
         return new ResponseEntity<>(followup, HttpStatus.OK);
     }
 
