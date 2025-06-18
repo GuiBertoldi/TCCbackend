@@ -64,15 +64,18 @@ public class UserService {
 
     public User update(Long idUser, UserRequest request) {
         User user = repository.findById(idUser).orElseThrow(() ->
-                new IllegalArgumentException("Usuário não encontrado."));
+                new IllegalArgumentException("Usuário não encontrado.")
+        );
 
-        String encodedPassword = user.getPassword();
+        String encodedPassword = null;
 
-        if (!"PACIENTE".equalsIgnoreCase(request.getType().toString())) {
-            if (request.getPassword() == null) {
+        if (!UserType.PACIENTE.equals(request.getType())) {
+            if (request.getPassword() == null || request.getPassword().isEmpty()) {
                 throw new IllegalArgumentException("Senha não pode ser nula para este tipo de usuário.");
             }
             encodedPassword = passwordEncoder.encode(request.getPassword());
+        } else {
+            encodedPassword = user.getPassword();
         }
 
         User updatedUser = repository.save(
@@ -90,11 +93,11 @@ public class UserService {
                         .street(request.getStreet())
                         .number(request.getNumber())
                         .complement(request.getComplement())
-                        .build());
+                        .build()
+        );
 
         return updatedUser;
     }
-
 
     public void delete(Long idUser) {
         User user = repository.findById(idUser).orElseThrow(() ->
