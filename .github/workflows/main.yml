@@ -1,15 +1,14 @@
-name: Analysis Sonar
+name: CI & SonarCloud
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
   sonarcloud:
-    name: SonarCloud scan
+    name: Build, Test & SonarCloud
     runs-on: ubuntu-latest
 
     steps:
@@ -20,67 +19,69 @@ jobs:
       - name: Setup JDK 17
         uses: actions/setup-java@v3
         with:
+          distribution: temurin
           java-version: '17'
-          distribution: 'temurin'
 
-      - name: SonarCloud packages
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Cache SonarCloud
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
 
-      - name: Maven
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+      - name: Build & run tests (incluindo Jacoco)
+        run: mvn clean verify -B
 
-      - name: Build
+      - name: SonarCloud Scan
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=GuiBertoldi_TCCbackend
+        run: mvn sonar:sonar \
+          -Dsonar.login=${{ env.SONAR_TOKEN }} \
+          -Dsonar.projectKey=guibertoldi_TCCbackend \
+          -Dsonar.organization=guibertoldi \
+          -Dsonar.host.url=https://sonarcloud.io
 
-  build:
-    name: Build Docker
+  build-docker:
+    name: Build & Push Docker
     runs-on: ubuntu-latest
     needs: sonarcloud
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Java
+      - uses: actions/checkout@v3
+      - name: Setup JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
-
-      - name: Build project
-        run: mvn clean install -DskipTests
-
-      - name: Login Docker Hub
+      - name: Build (skip tests)
+        run: mvn clean package -DskipTests
+      - name: Docker Login
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/tccbackend .
-
-      - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/tccbackend
+      - name: Build & Push
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/tccbackend .
+          docker push ${{ secrets.DOCKER_USERNAME }}/tccbackend
 
   deploy:
     name: Deploy to AWS
     runs-on: self-hosted
-    needs: build
+    needs: build-docker
 
     steps:
-      - name: Pull image from Docker Hub
-        run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/tccbackend:latest
-
-      - name: Remove existing Docker container
-        run: sudo docker rm -f tccbackend
-
-      - name: Run Docker container
-        run: sudo docker run -d -p 8080:8080 -e 'DATABASE_USERNAME=${{secrets.DATABASE_USERNAME}}' -e 'DATABASE_PASSWORD=${{secrets.DATABASE_PASSWORD}}' -e 'DATABASE_URL=${{secrets.DATABASE_URL}}' --name tccbackend ${{secrets.DOCKER_USERNAME}}/tccbackend:latest
+      - name: Pull & Run
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/tccbackend:latest
+          docker rm -f tccbackend || true
+          docker run -d -p 8080:8080 \
+            -e DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
+            -e DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
+            -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
+            --name tccbackend \
+            ${{ secrets.DOCKER_USERNAME }}/tccbackend:latest
