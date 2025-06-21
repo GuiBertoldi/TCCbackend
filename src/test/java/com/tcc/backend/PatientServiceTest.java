@@ -77,7 +77,6 @@ class PatientServiceTest {
         User createdUser = new User();
         createdUser.setIdUser(10L);
         when(userService.create(any(UserRequest.class))).thenReturn(createdUser);
-
         when(patientRepository.save(any(Patient.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Patient result = patientService.createPatient(req);
@@ -97,6 +96,16 @@ class PatientServiceTest {
     @Test
     void testUpdatePatientSuccess() {
         PatientRequest req = new PatientRequest();
+        req.setName("Nome Paciente");
+        req.setEmail("paciente@ex.com");
+        req.setCpf("12345678900");
+        req.setPhone("999999999");
+        req.setCep("12345-678");
+        req.setCity("Cidade Exemplo");
+        req.setNeighborhood("Bairro Exemplo");
+        req.setStreet("Rua Exemplo");
+        req.setNumber(123);
+        req.setComplement("Apto 456");
         req.setEmergencyContact("Novo Contato");
         req.setFatherName("Novo Pai");
         req.setFatherEducation("Educação Pai");
@@ -108,22 +117,10 @@ class PatientServiceTest {
         req.setMotherAge(48);
         req.setMotherWorkplace("Trabalho Mãe");
         req.setMotherProfession("Profissão Mãe");
-        req.setName("Nome Paciente");
-        req.setEmail("paciente@ex.com");
-        req.setCpf("12345678900");
-        req.setPhone("999999999");
-        req.setCep("12345-678");
-        req.setCity("Cidade Exemplo");
-        req.setNeighborhood("Bairro Exemplo");
-        req.setStreet("Rua Exemplo");
-        req.setNumber(123);
-        req.setComplement("Apto 456");
 
         when(patientRepository.findById(20L)).thenReturn(Optional.of(existingPatient));
-        when(userService.update(eq(10L), any(UserRequest.class)))
-                .thenReturn(existingUser);
-        when(patientRepository.save(existingPatient))
-                .thenAnswer(inv -> inv.getArgument(0));
+        when(userService.update(eq(10L), any(UserRequest.class))).thenReturn(existingUser);
+        when(patientRepository.save(existingPatient)).thenAnswer(inv -> inv.getArgument(0));
 
         Patient result = patientService.updatePatient(20L, req);
 
@@ -137,6 +134,17 @@ class PatientServiceTest {
         assertEquals("paciente@ex.com", captor.getValue().getEmail());
 
         verify(patientRepository).save(existingPatient);
+    }
+
+    @Test
+    void testUpdatePatientNotFound() {
+        when(patientRepository.findById(99L)).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> patientService.updatePatient(99L, new PatientRequest())
+        );
+        assertTrue(ex.getMessage().contains("Paciente não encontrado com o ID: 99"));
     }
 
     @Test
@@ -154,7 +162,11 @@ class PatientServiceTest {
     @Test
     void testGetByIdNotFound() {
         when(patientRepository.findById(99L)).thenReturn(Optional.empty());
-        Exception ex = assertThrows(IllegalArgumentException.class, () -> patientService.getById(99L));
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> patientService.getById(99L)
+        );
         assertTrue(ex.getMessage().contains("Paciente não encontrado com o ID: 99"));
     }
 
@@ -168,7 +180,11 @@ class PatientServiceTest {
     @Test
     void testFindByUserIdNotFound() {
         when(patientRepository.findByUserId(10L)).thenReturn(Optional.empty());
-        Exception ex = assertThrows(IllegalArgumentException.class, () -> patientService.findByUserId(10L));
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> patientService.findByUserId(10L)
+        );
         assertTrue(ex.getMessage().contains("Paciente não encontrado com o ID de usuário: 10"));
     }
 
@@ -180,7 +196,7 @@ class PatientServiceTest {
     }
 
     @Test
-    void testListPatients() {
+    void testListPatientsNonEmpty() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("idPatient"));
         Page<Patient> page = new PageImpl<>(Collections.singletonList(existingPatient), pageable, 1);
         when(patientRepository.findAll(pageable)).thenReturn(page);
@@ -188,5 +204,17 @@ class PatientServiceTest {
         Page<Patient> result = patientService.list(pageable);
         assertEquals(1, result.getTotalElements());
         assertEquals(existingPatient, result.getContent().get(0));
+    }
+
+    @Test
+    void testListPatientsEmpty() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Patient> page = new PageImpl<>(Collections.emptyList(), pageable, 0);
+        when(patientRepository.findAll(pageable)).thenReturn(page);
+
+        Page<Patient> result = patientService.list(pageable);
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalElements());
     }
 }
