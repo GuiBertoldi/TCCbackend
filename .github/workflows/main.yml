@@ -46,7 +46,7 @@ jobs:
         run: |
           mvn sonar:sonar \
           -Dsonar.login=${{ env.SONAR_TOKEN }} \
-          -Dsonar.projectKey=guibertoldi_TCCbackend \
+          -Dsonar.projectKey=GuiBertoldi_TCCbackend \
           -Dsonar.organization=guibertoldi \
           -Dsonar.host.url=https://sonarcloud.io
 
