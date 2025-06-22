@@ -43,7 +43,8 @@ jobs:
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn sonar:sonar \
+        run: |
+          mvn sonar:sonar \
           -Dsonar.login=${{ env.SONAR_TOKEN }} \
           -Dsonar.projectKey=guibertoldi_TCCbackend \
           -Dsonar.organization=guibertoldi \
