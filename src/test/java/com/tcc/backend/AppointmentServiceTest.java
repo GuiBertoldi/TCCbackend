@@ -18,10 +18,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.DayOfWeek;
 import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -29,16 +31,16 @@ import static org.mockito.Mockito.*;
 public class AppointmentServiceTest {
 
     @Mock private AppointmentRepository appointmentRepository;
-    @Mock private PatientRepository patientRepository;
+    @Mock private PatientRepository   patientRepository;
     @Mock private PsychologistRepository psychologistRepository;
     @Mock private AvailabilityRepository availabilityRepository;
     @InjectMocks private AppointmentService appointmentService;
 
-    private Patient patient;
+    private Patient     patient;
     private Psychologist psychologist;
     private Appointment existing;
-    private LocalDate today;
-    private LocalTime at10;
+    private LocalDate   today;
+    private LocalTime   at10;
 
     @BeforeEach
     void setUp() {
@@ -60,7 +62,7 @@ public class AppointmentServiceTest {
 
     @Test
     void testCreateSuccess() {
-        AppointmentRequest req = new AppointmentRequest();
+        var req = new AppointmentRequest();
         req.setIdPatient(1L);
         req.setIdPsychologist(2L);
         req.setDate(today);
@@ -79,9 +81,9 @@ public class AppointmentServiceTest {
         ArgumentCaptor<Appointment> cap = ArgumentCaptor.forClass(Appointment.class);
         when(appointmentRepository.save(cap.capture())).thenAnswer(i -> i.getArgument(0));
 
-        Appointment out = appointmentService.create(req);
+        var out = appointmentService.create(req);
 
-        Appointment passed = cap.getValue();
+        var passed = cap.getValue();
         assertEquals(patient, passed.getPatient());
         assertEquals(psychologist, passed.getPsychologist());
         assertEquals(today, passed.getDate());
@@ -92,12 +94,39 @@ public class AppointmentServiceTest {
     }
 
     @Test
+    void testCreateWithExistingNoConflict() {
+        var req = new AppointmentRequest();
+        req.setIdPatient(1L);
+        req.setIdPsychologist(2L);
+        req.setDate(today);
+        req.setTime(at10.plusHours(2));
+        req.setDuration(30);
+
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(psychologistRepository.findById(2L)).thenReturn(Optional.of(psychologist));
+        when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(2L, today.getDayOfWeek()))
+                .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(4))));
+        when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
+                .thenReturn(List.of(existing));
+
+        ArgumentCaptor<Appointment> cap = ArgumentCaptor.forClass(Appointment.class);
+        when(appointmentRepository.save(cap.capture())).thenAnswer(i -> i.getArgument(0));
+
+        var out = appointmentService.create(req);
+
+        assertNotNull(out);
+        assertEquals(at10.plusHours(2), cap.getValue().getTime());
+    }
+
+    @Test
     void testCreatePatientNotFound() {
         when(patientRepository.findById(1L)).thenReturn(Optional.empty());
-        AppointmentRequest req = new AppointmentRequest();
+        var req = new AppointmentRequest();
         req.setIdPatient(1L);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> appointmentService.create(req));
+        var ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentService.create(req)
+        );
         assertEquals("Paciente não encontrado", ex.getMessage());
     }
 
@@ -105,11 +134,13 @@ public class AppointmentServiceTest {
     void testCreatePsychologistNotFound() {
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
         when(psychologistRepository.findById(2L)).thenReturn(Optional.empty());
-        AppointmentRequest req = new AppointmentRequest();
+        var req = new AppointmentRequest();
         req.setIdPatient(1L);
         req.setIdPsychologist(2L);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> appointmentService.create(req));
+        var ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentService.create(req)
+        );
         assertEquals("Psicólogo não encontrado", ex.getMessage());
     }
 
@@ -119,14 +150,16 @@ public class AppointmentServiceTest {
         when(psychologistRepository.findById(2L)).thenReturn(Optional.of(psychologist));
         when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
                 .thenReturn(Collections.emptyList());
-        AppointmentRequest req = new AppointmentRequest();
+        var req = new AppointmentRequest();
         req.setIdPatient(1L);
         req.setIdPsychologist(2L);
         req.setDate(today);
         req.setTime(at10);
         req.setDuration(30);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> appointmentService.create(req));
+        var ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentService.create(req)
+        );
         assertEquals("Horário fora da disponibilidade do psicólogo", ex.getMessage());
     }
 
@@ -138,21 +171,22 @@ public class AppointmentServiceTest {
                 .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(2))));
         when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
                 .thenReturn(List.of(existing));
-        AppointmentRequest req = new AppointmentRequest();
+        var req = new AppointmentRequest();
         req.setIdPatient(1L);
         req.setIdPsychologist(2L);
         req.setDate(today);
-        req.setTime(at10.plusMinutes(30));
+        req.setTime(at10.plusMinutes(30)); // 10:30–11:30
         req.setDuration(60);
-        req.setStatus(AppointmentStatus.SCHEDULED);
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> appointmentService.create(req));
+        var ex = assertThrows(
+                IllegalStateException.class,
+                () -> appointmentService.create(req)
+        );
         assertEquals("Conflito de horário com outro agendamento", ex.getMessage());
     }
 
     @Test
-    void testUpdateSuccess() {
-        AppointmentUpdateRequest req = new AppointmentUpdateRequest();
+    void testUpdateSuccessDifferentDay() throws Exception {
+        var req = new AppointmentUpdateRequest();
         req.setDate(today.plusDays(1));
         req.setTime(at10.plusHours(1));
         req.setDuration(45);
@@ -166,7 +200,7 @@ public class AppointmentServiceTest {
                 .thenReturn(List.of(existing));
         when(appointmentRepository.save(existing)).thenReturn(existing);
 
-        Appointment out = appointmentService.update(5L, req);
+        var out = appointmentService.update(5L, req);
         assertEquals(today.plusDays(1), out.getDate());
         assertEquals(at10.plusHours(1), out.getTime());
         assertEquals(45, out.getDuration());
@@ -175,11 +209,36 @@ public class AppointmentServiceTest {
     }
 
     @Test
+    void testUpdateWithExistingNoConflictSameDay() throws Exception {
+        var req = new AppointmentUpdateRequest();
+        req.setDate(today);
+        req.setTime(at10.plusHours(2));
+        req.setDuration(30);
+        req.setStatus(AppointmentStatus.SCHEDULED);
+        req.setNotes("NoConflict");
+
+        when(appointmentRepository.findById(5L)).thenReturn(Optional.of(existing));
+        when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
+                .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(4))));
+        when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
+                .thenReturn(List.of(existing));
+        when(appointmentRepository.save(existing)).thenReturn(existing);
+
+        var out = appointmentService.update(5L, req);
+        assertEquals(today, out.getDate());
+        assertEquals(at10.plusHours(2), out.getTime());
+        assertEquals(30, out.getDuration());
+        assertEquals("NoConflict", out.getNotes());
+    }
+
+    @Test
     void testUpdateNotFound() {
         when(appointmentRepository.findById(5L)).thenReturn(Optional.empty());
-        AppointmentUpdateRequest req = new AppointmentUpdateRequest();
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> appointmentService.update(5L, req));
+        var req = new AppointmentUpdateRequest();
+        var ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentService.update(5L, req)
+        );
         assertEquals("Agendamento não encontrado com o ID: 5", ex.getMessage());
     }
 
@@ -188,18 +247,20 @@ public class AppointmentServiceTest {
         when(appointmentRepository.findById(5L)).thenReturn(Optional.of(existing));
         when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
                 .thenReturn(Collections.emptyList());
-        AppointmentUpdateRequest req = new AppointmentUpdateRequest();
+        var req = new AppointmentUpdateRequest();
         req.setDate(today);
         req.setTime(at10);
         req.setDuration(30);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> appointmentService.update(5L, req));
+        var ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentService.update(5L, req)
+        );
         assertEquals("Horário fora da disponibilidade do psicólogo", ex.getMessage());
     }
 
     @Test
     void testUpdateConflict() {
-        Appointment other = Appointment.builder()
+        var other = Appointment.builder()
                 .idAppointment(9L)
                 .patient(patient)
                 .psychologist(psychologist)
@@ -214,14 +275,16 @@ public class AppointmentServiceTest {
         when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
                 .thenReturn(List.of(existing, other));
 
-        AppointmentUpdateRequest req = new AppointmentUpdateRequest();
+        var req = new AppointmentUpdateRequest();
         req.setDate(today);
         req.setTime(at10.plusHours(1));
         req.setDuration(30);
         req.setStatus(AppointmentStatus.SCHEDULED);
         req.setNotes("");
-        IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> appointmentService.update(5L, req));
+        var ex = assertThrows(
+                IllegalStateException.class,
+                () -> appointmentService.update(5L, req)
+        );
         assertEquals("Conflito de horário com outro agendamento", ex.getMessage());
     }
 
@@ -235,23 +298,27 @@ public class AppointmentServiceTest {
     @Test
     void testDeleteNotFound() {
         when(appointmentRepository.findById(5L)).thenReturn(Optional.empty());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> appointmentService.delete(5L));
+        var ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentService.delete(5L)
+        );
         assertEquals("Agendamento não encontrado com o ID: 5", ex.getMessage());
     }
 
     @Test
     void testGetByIdSuccess() {
         when(appointmentRepository.findById(5L)).thenReturn(Optional.of(existing));
-        Appointment a = appointmentService.getById(5L);
+        var a = appointmentService.getById(5L);
         assertEquals(existing, a);
     }
 
     @Test
     void testGetByIdNotFound() {
         when(appointmentRepository.findById(5L)).thenReturn(Optional.empty());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> appointmentService.getById(5L));
+        var ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentService.getById(5L)
+        );
         assertEquals("Agendamento não encontrado com o ID: 5", ex.getMessage());
     }
 
@@ -259,17 +326,17 @@ public class AppointmentServiceTest {
     void testGetAppointmentByUserId() {
         when(appointmentRepository.findAppointmentsByUserId(1L))
                 .thenReturn(List.of(existing));
-        List<Appointment> list = appointmentService.getAppointmentByUserId(1L);
+        var list = appointmentService.getAppointmentByUserId(1L);
         assertEquals(1, list.size());
         assertEquals(existing, list.get(0));
     }
 
     @Test
     void testList() {
-        Pageable page = PageRequest.of(0, 10);
-        Page<Appointment> p = new PageImpl<>(List.of(existing), page, 1);
+        var page = PageRequest.of(0, 10);
+        var p = new PageImpl<>(List.of(existing), page, 1);
         when(appointmentRepository.findAll(page)).thenReturn(p);
-        Page<Appointment> out = appointmentService.list(page);
+        var out = appointmentService.list(page);
         assertEquals(1, out.getTotalElements());
         assertEquals(existing, out.getContent().get(0));
     }
