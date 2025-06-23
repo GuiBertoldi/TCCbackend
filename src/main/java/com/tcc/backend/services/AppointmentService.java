@@ -21,6 +21,8 @@ import java.util.List;
 @Service
 public class AppointmentService {
 
+    private static final String NOT_FOUND_MSG = "Agendamento não encontrado com o ID: ";
+
     private final AppointmentRepository repository;
     private final PatientRepository patientRepository;
     private final PsychologistRepository psychologistRepository;
@@ -83,7 +85,7 @@ public class AppointmentService {
 
     public Appointment update(Long idAppointment, AppointmentUpdateRequest request) {
         Appointment existing = repository.findById(idAppointment)
-                .orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado com o ID: " + idAppointment));
+                .orElseThrow(() -> new IllegalArgumentException(NOT_FOUND_MSG + idAppointment));
 
         LocalTime start = request.getTime();
         LocalTime end = start.plusMinutes(request.getDuration());
@@ -122,20 +124,20 @@ public class AppointmentService {
 
     public void delete(Long idAppointment) {
         Appointment appointment = repository.findById(idAppointment)
-                .orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado com o ID: " + idAppointment));
+                .orElseThrow(() -> new IllegalArgumentException(NOT_FOUND_MSG + idAppointment));
         repository.delete(appointment);
     }
 
     public Appointment getById(Long idAppointment) {
         return repository.findById(idAppointment)
-                .orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado com o ID: " + idAppointment));
-    }
-
-    public Page<Appointment> list(Pageable pageable) {
-        return repository.findAll(pageable);
+                .orElseThrow(() -> new IllegalArgumentException(NOT_FOUND_MSG + idAppointment));
     }
 
     public List<Appointment> getAppointmentByUserId(Long userId) {
         return repository.findAppointmentsByUserId(userId);
+    }
+
+    public Page<Appointment> list(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 }

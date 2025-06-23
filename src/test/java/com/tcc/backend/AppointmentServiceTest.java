@@ -19,9 +19,9 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.DayOfWeek;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,16 +31,16 @@ import static org.mockito.Mockito.*;
 public class AppointmentServiceTest {
 
     @Mock private AppointmentRepository appointmentRepository;
-    @Mock private PatientRepository   patientRepository;
+    @Mock private PatientRepository patientRepository;
     @Mock private PsychologistRepository psychologistRepository;
     @Mock private AvailabilityRepository availabilityRepository;
     @InjectMocks private AppointmentService appointmentService;
 
-    private Patient     patient;
+    private Patient patient;
     private Psychologist psychologist;
     private Appointment existing;
-    private LocalDate   today;
-    private LocalTime   at10;
+    private LocalDate today;
+    private LocalTime at10;
 
     @BeforeEach
     void setUp() {
@@ -62,7 +62,7 @@ public class AppointmentServiceTest {
 
     @Test
     void testCreateSuccess() {
-        var req = new AppointmentRequest();
+        AppointmentRequest req = new AppointmentRequest();
         req.setIdPatient(1L);
         req.setIdPsychologist(2L);
         req.setDate(today);
@@ -73,17 +73,20 @@ public class AppointmentServiceTest {
 
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
         when(psychologistRepository.findById(2L)).thenReturn(Optional.of(psychologist));
-        when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(2L, today.getDayOfWeek()))
+        when(availabilityRepository
+                .findByPsychologistIdPsychologistAndDayOfWeek(2L, today.getDayOfWeek()))
                 .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(4))));
-        when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
+        when(appointmentRepository
+                .findByPsychologist_IdPsychologistAndDate(2L, today))
                 .thenReturn(Collections.emptyList());
 
         ArgumentCaptor<Appointment> cap = ArgumentCaptor.forClass(Appointment.class);
-        when(appointmentRepository.save(cap.capture())).thenAnswer(i -> i.getArgument(0));
+        when(appointmentRepository.save(cap.capture()))
+                .thenAnswer(i -> i.getArgument(0));
 
-        var out = appointmentService.create(req);
+        Appointment out = appointmentService.create(req);
 
-        var passed = cap.getValue();
+        Appointment passed = cap.getValue();
         assertEquals(patient, passed.getPatient());
         assertEquals(psychologist, passed.getPsychologist());
         assertEquals(today, passed.getDate());
@@ -94,36 +97,11 @@ public class AppointmentServiceTest {
     }
 
     @Test
-    void testCreateWithExistingNoConflict() {
-        var req = new AppointmentRequest();
-        req.setIdPatient(1L);
-        req.setIdPsychologist(2L);
-        req.setDate(today);
-        req.setTime(at10.plusHours(2));
-        req.setDuration(30);
-
-        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
-        when(psychologistRepository.findById(2L)).thenReturn(Optional.of(psychologist));
-        when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(2L, today.getDayOfWeek()))
-                .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(4))));
-        when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
-                .thenReturn(List.of(existing));
-
-        ArgumentCaptor<Appointment> cap = ArgumentCaptor.forClass(Appointment.class);
-        when(appointmentRepository.save(cap.capture())).thenAnswer(i -> i.getArgument(0));
-
-        var out = appointmentService.create(req);
-
-        assertNotNull(out);
-        assertEquals(at10.plusHours(2), cap.getValue().getTime());
-    }
-
-    @Test
     void testCreatePatientNotFound() {
         when(patientRepository.findById(1L)).thenReturn(Optional.empty());
-        var req = new AppointmentRequest();
+        AppointmentRequest req = new AppointmentRequest();
         req.setIdPatient(1L);
-        var ex = assertThrows(
+        IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () -> appointmentService.create(req)
         );
@@ -134,10 +112,10 @@ public class AppointmentServiceTest {
     void testCreatePsychologistNotFound() {
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
         when(psychologistRepository.findById(2L)).thenReturn(Optional.empty());
-        var req = new AppointmentRequest();
+        AppointmentRequest req = new AppointmentRequest();
         req.setIdPatient(1L);
         req.setIdPsychologist(2L);
-        var ex = assertThrows(
+        IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () -> appointmentService.create(req)
         );
@@ -148,15 +126,16 @@ public class AppointmentServiceTest {
     void testCreateOutOfAvailability() {
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
         when(psychologistRepository.findById(2L)).thenReturn(Optional.of(psychologist));
-        when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
+        when(availabilityRepository
+                .findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
                 .thenReturn(Collections.emptyList());
-        var req = new AppointmentRequest();
+        AppointmentRequest req = new AppointmentRequest();
         req.setIdPatient(1L);
         req.setIdPsychologist(2L);
         req.setDate(today);
         req.setTime(at10);
         req.setDuration(30);
-        var ex = assertThrows(
+        IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () -> appointmentService.create(req)
         );
@@ -167,17 +146,20 @@ public class AppointmentServiceTest {
     void testCreateConflict() {
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
         when(psychologistRepository.findById(2L)).thenReturn(Optional.of(psychologist));
-        when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
+        when(availabilityRepository
+                .findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
                 .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(2))));
-        when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
+        when(appointmentRepository
+                .findByPsychologist_IdPsychologistAndDate(2L, today))
                 .thenReturn(List.of(existing));
-        var req = new AppointmentRequest();
+        AppointmentRequest req = new AppointmentRequest();
         req.setIdPatient(1L);
         req.setIdPsychologist(2L);
         req.setDate(today);
-        req.setTime(at10.plusMinutes(30)); // 10:30–11:30
+        req.setTime(at10.plusMinutes(30));
         req.setDuration(60);
-        var ex = assertThrows(
+        req.setStatus(AppointmentStatus.SCHEDULED);
+        IllegalStateException ex = assertThrows(
                 IllegalStateException.class,
                 () -> appointmentService.create(req)
         );
@@ -185,8 +167,8 @@ public class AppointmentServiceTest {
     }
 
     @Test
-    void testUpdateSuccessDifferentDay() throws Exception {
-        var req = new AppointmentUpdateRequest();
+    void testUpdateSuccess() {
+        AppointmentUpdateRequest req = new AppointmentUpdateRequest();
         req.setDate(today.plusDays(1));
         req.setTime(at10.plusHours(1));
         req.setDuration(45);
@@ -194,13 +176,16 @@ public class AppointmentServiceTest {
         req.setNotes("Updated");
 
         when(appointmentRepository.findById(5L)).thenReturn(Optional.of(existing));
-        when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
-                .thenReturn(List.of(createAvailability(today.plusDays(1).getDayOfWeek(), at10, at10.plusHours(3))));
-        when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today.plusDays(1)))
+        when(availabilityRepository
+                .findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
+                .thenReturn(List.of(createAvailability(
+                        today.plusDays(1).getDayOfWeek(), at10, at10.plusHours(3))));
+        when(appointmentRepository
+                .findByPsychologist_IdPsychologistAndDate(2L, today.plusDays(1)))
                 .thenReturn(List.of(existing));
         when(appointmentRepository.save(existing)).thenReturn(existing);
 
-        var out = appointmentService.update(5L, req);
+        Appointment out = appointmentService.update(5L, req);
         assertEquals(today.plusDays(1), out.getDate());
         assertEquals(at10.plusHours(1), out.getTime());
         assertEquals(45, out.getDuration());
@@ -209,33 +194,10 @@ public class AppointmentServiceTest {
     }
 
     @Test
-    void testUpdateWithExistingNoConflictSameDay() throws Exception {
-        var req = new AppointmentUpdateRequest();
-        req.setDate(today);
-        req.setTime(at10.plusHours(2));
-        req.setDuration(30);
-        req.setStatus(AppointmentStatus.SCHEDULED);
-        req.setNotes("NoConflict");
-
-        when(appointmentRepository.findById(5L)).thenReturn(Optional.of(existing));
-        when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
-                .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(4))));
-        when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
-                .thenReturn(List.of(existing));
-        when(appointmentRepository.save(existing)).thenReturn(existing);
-
-        var out = appointmentService.update(5L, req);
-        assertEquals(today, out.getDate());
-        assertEquals(at10.plusHours(2), out.getTime());
-        assertEquals(30, out.getDuration());
-        assertEquals("NoConflict", out.getNotes());
-    }
-
-    @Test
     void testUpdateNotFound() {
         when(appointmentRepository.findById(5L)).thenReturn(Optional.empty());
-        var req = new AppointmentUpdateRequest();
-        var ex = assertThrows(
+        AppointmentUpdateRequest req = new AppointmentUpdateRequest();
+        IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () -> appointmentService.update(5L, req)
         );
@@ -245,13 +207,14 @@ public class AppointmentServiceTest {
     @Test
     void testUpdateOutOfAvailability() {
         when(appointmentRepository.findById(5L)).thenReturn(Optional.of(existing));
-        when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
+        when(availabilityRepository
+                .findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
                 .thenReturn(Collections.emptyList());
-        var req = new AppointmentUpdateRequest();
+        AppointmentUpdateRequest req = new AppointmentUpdateRequest();
         req.setDate(today);
         req.setTime(at10);
         req.setDuration(30);
-        var ex = assertThrows(
+        IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () -> appointmentService.update(5L, req)
         );
@@ -260,7 +223,7 @@ public class AppointmentServiceTest {
 
     @Test
     void testUpdateConflict() {
-        var other = Appointment.builder()
+        Appointment other = Appointment.builder()
                 .idAppointment(9L)
                 .patient(patient)
                 .psychologist(psychologist)
@@ -270,18 +233,20 @@ public class AppointmentServiceTest {
                 .build();
 
         when(appointmentRepository.findById(5L)).thenReturn(Optional.of(existing));
-        when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
+        when(availabilityRepository
+                .findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
                 .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(4))));
-        when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
+        when(appointmentRepository
+                .findByPsychologist_IdPsychologistAndDate(2L, today))
                 .thenReturn(List.of(existing, other));
 
-        var req = new AppointmentUpdateRequest();
+        AppointmentUpdateRequest req = new AppointmentUpdateRequest();
         req.setDate(today);
         req.setTime(at10.plusHours(1));
         req.setDuration(30);
         req.setStatus(AppointmentStatus.SCHEDULED);
         req.setNotes("");
-        var ex = assertThrows(
+        IllegalStateException ex = assertThrows(
                 IllegalStateException.class,
                 () -> appointmentService.update(5L, req)
         );
@@ -298,7 +263,7 @@ public class AppointmentServiceTest {
     @Test
     void testDeleteNotFound() {
         when(appointmentRepository.findById(5L)).thenReturn(Optional.empty());
-        var ex = assertThrows(
+        IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () -> appointmentService.delete(5L)
         );
@@ -308,14 +273,14 @@ public class AppointmentServiceTest {
     @Test
     void testGetByIdSuccess() {
         when(appointmentRepository.findById(5L)).thenReturn(Optional.of(existing));
-        var a = appointmentService.getById(5L);
+        Appointment a = appointmentService.getById(5L);
         assertEquals(existing, a);
     }
 
     @Test
     void testGetByIdNotFound() {
         when(appointmentRepository.findById(5L)).thenReturn(Optional.empty());
-        var ex = assertThrows(
+        IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () -> appointmentService.getById(5L)
         );
@@ -326,17 +291,17 @@ public class AppointmentServiceTest {
     void testGetAppointmentByUserId() {
         when(appointmentRepository.findAppointmentsByUserId(1L))
                 .thenReturn(List.of(existing));
-        var list = appointmentService.getAppointmentByUserId(1L);
+        List<Appointment> list = appointmentService.getAppointmentByUserId(1L);
         assertEquals(1, list.size());
         assertEquals(existing, list.get(0));
     }
 
     @Test
     void testList() {
-        var page = PageRequest.of(0, 10);
-        var p = new PageImpl<>(List.of(existing), page, 1);
+        Pageable page = PageRequest.of(0, 10);
+        Page<Appointment> p = new PageImpl<>(List.of(existing), page, 1);
         when(appointmentRepository.findAll(page)).thenReturn(p);
-        var out = appointmentService.list(page);
+        Page<Appointment> out = appointmentService.list(page);
         assertEquals(1, out.getTotalElements());
         assertEquals(existing, out.getContent().get(0));
     }

@@ -18,6 +18,8 @@ import java.util.List;
 @Transactional
 public class UserService {
 
+    private static final String NOT_FOUND = "Usuário não encontrado.";
+
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
 
@@ -28,21 +30,18 @@ public class UserService {
     }
 
     public boolean validatePassword(String rawPassword, String storedPassword) {
-        return passwordEncoder.matches(rawPassword, storedPassword) ||
-                rawPassword.equals(storedPassword);
+        return passwordEncoder.matches(rawPassword, storedPassword)
+                || rawPassword.equals(storedPassword);
     }
-
 
     public User create(UserRequest request) {
         String encodedPassword = null;
-
         if (!UserType.PACIENTE.equals(request.getType())) {
             if (request.getPassword() == null || request.getPassword().isEmpty()) {
                 throw new IllegalArgumentException("Senha não pode ser nula para este tipo de usuário.");
             }
             encodedPassword = passwordEncoder.encode(request.getPassword());
         }
-
         User newUser = User.builder()
                 .type(request.getType())
                 .name(request.getName())
@@ -57,68 +56,59 @@ public class UserService {
                 .number(request.getNumber())
                 .complement(request.getComplement())
                 .build();
-
         return repository.save(newUser);
     }
 
-
     public User update(Long idUser, UserRequest request) {
-        User user = repository.findById(idUser).orElseThrow(() ->
-                new IllegalArgumentException("Usuário não encontrado.")
-        );
+        User existing = repository.findById(idUser)
+                .orElseThrow(() -> new IllegalArgumentException(NOT_FOUND));
 
-        String encodedPassword = null;
-
+        String encodedPassword;
         if (!UserType.PACIENTE.equals(request.getType())) {
             if (request.getPassword() == null || request.getPassword().isEmpty()) {
                 throw new IllegalArgumentException("Senha não pode ser nula para este tipo de usuário.");
             }
             encodedPassword = passwordEncoder.encode(request.getPassword());
         } else {
-            encodedPassword = user.getPassword();
+            encodedPassword = existing.getPassword();
         }
 
-        User updatedUser = repository.save(
-                User.builder()
-                        .idUser(user.getIdUser())
-                        .type(request.getType())
-                        .name(request.getName())
-                        .email(request.getEmail())
-                        .password(encodedPassword)
-                        .cpf(request.getCpf())
-                        .phone(request.getPhone())
-                        .cep(request.getCep())
-                        .city(request.getCity())
-                        .neighborhood(request.getNeighborhood())
-                        .street(request.getStreet())
-                        .number(request.getNumber())
-                        .complement(request.getComplement())
-                        .build()
-        );
-
-        return updatedUser;
+        return repository.save(User.builder()
+                .idUser(existing.getIdUser())
+                .type(request.getType())
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(encodedPassword)
+                .cpf(request.getCpf())
+                .phone(request.getPhone())
+                .cep(request.getCep())
+                .city(request.getCity())
+                .neighborhood(request.getNeighborhood())
+                .street(request.getStreet())
+                .number(request.getNumber())
+                .complement(request.getComplement())
+                .build());
     }
 
     public void delete(Long idUser) {
-        User user = repository.findById(idUser).orElseThrow(() ->
-                new IllegalArgumentException("Usuário não encontrado."));
-        repository.delete(user);
+        User toDelete = repository.findById(idUser)
+                .orElseThrow(() -> new IllegalArgumentException(NOT_FOUND));
+        repository.delete(toDelete);
     }
 
     public User getById(Long idUser) {
-        return repository.findById(idUser).orElseThrow(() ->
-                new IllegalArgumentException("Usuário não encontrado."));
+        return repository.findById(idUser)
+                .orElseThrow(() -> new IllegalArgumentException(NOT_FOUND));
     }
 
     public User getByCpf(String cpf) {
-        return repository.findByCpf(cpf).orElseThrow(() ->
-                new IllegalArgumentException("Usuário com CPF não encontrado."));
+        return repository.findByCpf(cpf)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário com CPF não encontrado."));
     }
 
     public User getByEmail(String email) {
-        return repository.findByEmail(email).orElseThrow(() ->
-                new IllegalArgumentException("Usuário com email não encontrado.")
-        );
+        return repository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário com email não encontrado."));
     }
 
     public List<User> getUsersByType(UserType type) {
@@ -131,5 +121,4 @@ public class UserService {
         }
         return repository.findAll(pageable);
     }
-
 }

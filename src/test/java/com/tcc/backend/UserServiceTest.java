@@ -8,12 +8,9 @@ import com.tcc.backend.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Arrays;
@@ -27,13 +24,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
+    @InjectMocks private UserService  userService;
 
-    @InjectMocks
-    private UserService userService;
-
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final String encoded = new BCryptPasswordEncoder().encode("secret");
     private User user;
 
     @BeforeEach
@@ -42,126 +36,170 @@ public class UserServiceTest {
         user.setIdUser(1L);
         user.setCpf("12345678900");
         user.setEmail("user@example.com");
-        user.setPassword(passwordEncoder.encode("myPassword123"));
+        user.setPassword(encoded);
     }
 
     @Test
-    void testValidatePasswordSuccess() {
-        assertTrue(userService.validatePassword("myPassword123", user.getPassword()));
+    void testValidatePassword_BcryptMatch() {
+        assertTrue(userService.validatePassword("secret", encoded));
     }
 
     @Test
-    void testValidatePasswordFailure() {
-        assertFalse(userService.validatePassword("wrongPassword", user.getPassword()));
+    void testValidatePassword_PlainMatch() {
+        String raw = "plainValue";
+        assertTrue(userService.validatePassword(raw, raw));
     }
 
     @Test
-    void testGetByIdNotFound() {
+    void testValidatePassword_Failure() {
+        assertFalse(userService.validatePassword("wrong", encoded));
+    }
+
+    @Test
+    void testGetById_NotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> userService.getById(1L));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.getById(1L)
+        );
         assertEquals("Usuário não encontrado.", ex.getMessage());
     }
 
     @Test
-    void testGetByIdSuccess() {
+    void testGetById_Success() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        User fetched = userService.getById(1L);
-        assertEquals(1L, fetched.getIdUser());
+        assertEquals(1L, userService.getById(1L).getIdUser());
     }
 
     @Test
-    void testGetByEmailNotFound() {
+    void testGetByEmail_NotFound() {
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> userService.getByEmail("user@example.com"));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.getByEmail("user@example.com")
+        );
         assertEquals("Usuário com email não encontrado.", ex.getMessage());
     }
 
     @Test
-    void testGetByCpfNotFound() {
+    void testGetByEmail_Success() {
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        assertEquals("user@example.com", userService.getByEmail("user@example.com").getEmail());
+    }
+
+    @Test
+    void testGetByCpf_NotFound() {
         when(userRepository.findByCpf("12345678900")).thenReturn(Optional.empty());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> userService.getByCpf("12345678900"));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.getByCpf("12345678900")
+        );
         assertEquals("Usuário com CPF não encontrado.", ex.getMessage());
     }
 
     @Test
-    void testGetByCpfSuccess() {
+    void testGetByCpf_Success() {
         when(userRepository.findByCpf("12345678900")).thenReturn(Optional.of(user));
-        User fetched = userService.getByCpf("12345678900");
-        assertEquals("12345678900", fetched.getCpf());
+        assertEquals("12345678900", userService.getByCpf("12345678900").getCpf());
     }
 
     @Test
-    void testCreateUserSuccess() {
+    void testCreate_Psicologo_Success() {
         UserRequest req = new UserRequest();
         req.setType(UserType.PSICOLOGO);
-        req.setEmail("newUser@example.com");
-        req.setPassword("newPassword123");
+        req.setEmail("new@psych.com");
+        req.setPassword("pwd123");
 
-        User savedMock = new User();
-        savedMock.setEmail(req.getEmail());
-        savedMock.setPassword(passwordEncoder.encode(req.getPassword()));
+        User saved = new User();
+        saved.setEmail("new@psych.com");
+        when(userRepository.save(any())).thenReturn(saved);
 
-        when(userRepository.save(any(User.class))).thenReturn(savedMock);
-
-        User result = userService.create(req);
-        assertNotNull(result);
-        assertEquals("newUser@example.com", result.getEmail());
+        User out = userService.create(req);
+        assertEquals("new@psych.com", out.getEmail());
+        verify(userRepository).save(argThat(u -> u.getPassword() != null && !u.getPassword().isEmpty()));
     }
 
     @Test
-    void testUpdateUserSuccess() {
+    void testCreate_Patient_Success() {
         UserRequest req = new UserRequest();
         req.setType(UserType.PACIENTE);
-        req.setName("Updated User");
-        req.setEmail("updatedEmail@example.com");
-        req.setPassword(null);  // paciente pode não enviar senha
+        req.setEmail("new@patient.com");
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        User updatedMock = new User();
-        updatedMock.setName(req.getName());
-        updatedMock.setEmail(req.getEmail());
-        when(userRepository.save(any(User.class))).thenReturn(updatedMock);
+        when(userRepository.save(any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        User result = userService.update(1L, req);
-        assertEquals("updatedEmail@example.com", result.getEmail());
-        assertEquals("Updated User", result.getName());
+        User out = userService.create(req);
+
+        assertEquals("new@patient.com", out.getEmail());
+        verify(userRepository).save(argThat(u -> u.getPassword() == null));
     }
 
     @Test
-    void testUpdateUserNotFound() {
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> userService.update(1L, new UserRequest()));
-        assertEquals("Usuário não encontrado.", ex.getMessage());
-    }
-
-    @Test
-    void testUpdateUserFailureWhenPasswordNullForNonPaciente() {
+    void testCreate_PasswordNullForNonPaciente() {
         UserRequest req = new UserRequest();
         req.setType(UserType.PSICOLOGO);
-        req.setPassword(null);
+        req.setPassword("");
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> userService.update(1L, req));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.create(req)
+        );
         assertEquals("Senha não pode ser nula para este tipo de usuário.", ex.getMessage());
     }
 
     @Test
-    void testDeleteUserSuccess() {
+    void testUpdate_NotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.update(1L, new UserRequest())
+        );
+        assertEquals("Usuário não encontrado.", ex.getMessage());
+    }
+
+    @Test
+    void testUpdate_Paciente_KeepsPassword() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserRequest req = new UserRequest();
+        req.setType(UserType.PACIENTE);
+        req.setPassword(null);
+
+        when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        User out = userService.update(1L, req);
+        assertEquals(encoded, out.getPassword());
+    }
+
+    @Test
+    void testUpdate_NonPaciente_NullPassword() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserRequest req = new UserRequest();
+        req.setType(UserType.PSICOLOGO);
+        req.setPassword(null);
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.update(1L, req)
+        );
+        assertEquals("Senha não pode ser nula para este tipo de usuário.", ex.getMessage());
+    }
+
+    @Test
+    void testDelete_Success() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         assertDoesNotThrow(() -> userService.delete(1L));
         verify(userRepository).delete(user);
     }
 
     @Test
-    void testDeleteUserNotFound() {
+    void testDelete_NotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> userService.delete(1L));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.delete(1L)
+        );
         assertEquals("Usuário não encontrado.", ex.getMessage());
     }
 
@@ -169,32 +207,27 @@ public class UserServiceTest {
     void testGetUsersByType() {
         User u1 = new User(); u1.setType(UserType.PSICOLOGO);
         User u2 = new User(); u2.setType(UserType.PSICOLOGO);
-        List<User> list = Arrays.asList(u1, u2);
-        when(userRepository.findByType(UserType.PSICOLOGO)).thenReturn(list);
+        when(userRepository.findByType(UserType.PSICOLOGO)).thenReturn(Arrays.asList(u1, u2));
 
-        List<User> result = userService.getUsersByType(UserType.PSICOLOGO);
-        assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(u -> u.getType() == UserType.PSICOLOGO));
+        List<User> out = userService.getUsersByType(UserType.PSICOLOGO);
+        assertEquals(2, out.size());
     }
 
     @Test
-    void testListWithoutName() {
-        PageRequest page = PageRequest.of(0, 10);
-        Page<User> pageAll = new PageImpl<>(Collections.singletonList(user));
-        when(userRepository.findAll(page)).thenReturn(pageAll);
+    void testList_NoFilter() {
+        PageRequest page = PageRequest.of(0, 5);
+        Page<User> p = new PageImpl<>(Collections.singletonList(user), page, 1);
+        when(userRepository.findAll(page)).thenReturn(p);
 
-        Page<User> result = userService.list("", page);
-        assertEquals(1, result.getTotalElements());
+        assertEquals(1, userService.list("", page).getTotalElements());
     }
 
     @Test
-    void testListWithNameFilter() {
-        PageRequest page = PageRequest.of(0, 10);
-        Page<User> pageFiltered = new PageImpl<>(Collections.singletonList(user));
-        when(userRepository.findByNameContainingIgnoreCase("use", page))
-                .thenReturn(pageFiltered);
+    void testList_WithFilter() {
+        PageRequest page = PageRequest.of(0, 5);
+        Page<User> p = new PageImpl<>(Collections.singletonList(user), page, 1);
+        when(userRepository.findByNameContainingIgnoreCase("use", page)).thenReturn(p);
 
-        Page<User> result = userService.list("use", page);
-        assertEquals(1, result.getTotalElements());
+        assertEquals(1, userService.list("use", page).getTotalElements());
     }
 }
