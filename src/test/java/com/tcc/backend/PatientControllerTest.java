@@ -41,12 +41,10 @@ class PatientControllerTest {
     @MockBean
     private PatientService service;
 
-    // Desativamos o filtro de segurança para testes de controller
     @MockBean private JwtRequestFilter jwtRequestFilter;
     @MockBean private JwtUtil jwtUtil;
 
     private Patient buildPatient() {
-        // primeiro criamos um User para embutir no Patient
         User user = User.builder()
                 .idUser(42L)
                 .type(UserType.PACIENTE)
