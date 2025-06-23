@@ -37,12 +37,12 @@ public class AppointmentService {
         this.availabilityRepository = availabilityRepository;
     }
 
-    public Appointment create(AppointmentRequest request) throws Exception {
+    public Appointment create(AppointmentRequest request) {
         Patient patient = patientRepository.findById(request.getIdPatient())
-                .orElseThrow(() -> new Exception("Paciente não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado"));
 
         Psychologist psychologist = psychologistRepository.findById(request.getIdPsychologist())
-                .orElseThrow(() -> new Exception("Psicólogo não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Psicólogo não encontrado"));
 
         LocalTime start = request.getTime();
         LocalTime end = start.plusMinutes(request.getDuration());
@@ -53,15 +53,18 @@ public class AppointmentService {
                 .stream()
                 .anyMatch(a -> !start.isBefore(a.getStartTime()) && !end.isAfter(a.getEndTime()));
 
-        if (!available) throw new Exception("Horário fora da disponibilidade do psicólogo");
+        if (!available) {
+            throw new IllegalArgumentException("Horário fora da disponibilidade do psicólogo");
+        }
 
-        List<Appointment> existing = repository
-                .findByPsychologist_IdPsychologistAndDate(psychologist.getIdPsychologist(), request.getDate());
+        List<Appointment> existing = repository.findByPsychologist_IdPsychologistAndDate(
+                psychologist.getIdPsychologist(), request.getDate()
+        );
         existing.forEach(ex -> {
             LocalTime exStart = ex.getTime();
             LocalTime exEnd = exStart.plusMinutes(ex.getDuration());
             if (start.isBefore(exEnd) && exStart.isBefore(end)) {
-                throw new RuntimeException("Conflito de horário com outro agendamento");
+                throw new IllegalStateException("Conflito de horário com outro agendamento");
             }
         });
 
@@ -78,7 +81,7 @@ public class AppointmentService {
         return repository.save(appointment);
     }
 
-    public Appointment update(Long idAppointment, AppointmentUpdateRequest request) throws Exception {
+    public Appointment update(Long idAppointment, AppointmentUpdateRequest request) {
         Appointment existing = repository.findById(idAppointment)
                 .orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado com o ID: " + idAppointment));
 
@@ -91,17 +94,20 @@ public class AppointmentService {
                 .stream()
                 .anyMatch(a -> !start.isBefore(a.getStartTime()) && !end.isAfter(a.getEndTime()));
 
-        if (!available) throw new Exception("Horário fora da disponibilidade do psicólogo");
+        if (!available) {
+            throw new IllegalArgumentException("Horário fora da disponibilidade do psicólogo");
+        }
 
-        List<Appointment> existingSameDay = repository
-                .findByPsychologist_IdPsychologistAndDate(existing.getPsychologist().getIdPsychologist(), request.getDate());
+        List<Appointment> existingSameDay = repository.findByPsychologist_IdPsychologistAndDate(
+                existing.getPsychologist().getIdPsychologist(), request.getDate()
+        );
         existingSameDay.stream()
                 .filter(a -> !a.getIdAppointment().equals(idAppointment))
                 .forEach(ex -> {
                     LocalTime exStart = ex.getTime();
                     LocalTime exEnd = exStart.plusMinutes(ex.getDuration());
                     if (start.isBefore(exEnd) && exStart.isBefore(end)) {
-                        throw new RuntimeException("Conflito de horário com outro agendamento");
+                        throw new IllegalStateException("Conflito de horário com outro agendamento");
                     }
                 });
 
@@ -125,11 +131,11 @@ public class AppointmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Agendamento não encontrado com o ID: " + idAppointment));
     }
 
-    public List<Appointment> getAppointmentByUserId(Long userId) {
-        return repository.findAppointmentsByUserId(userId);
-    }
-
     public Page<Appointment> list(Pageable pageable) {
         return repository.findAll(pageable);
+    }
+
+    public List<Appointment> getAppointmentByUserId(Long userId) {
+        return repository.findAppointmentsByUserId(userId);
     }
 }

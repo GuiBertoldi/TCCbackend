@@ -18,32 +18,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.DayOfWeek;
 import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AppointmentServiceTest {
 
-    @Mock
-    private AppointmentRepository appointmentRepository;
-
-    @Mock
-    private PatientRepository patientRepository;
-
-    @Mock
-    private PsychologistRepository psychologistRepository;
-
-    @Mock
-    private AvailabilityRepository availabilityRepository;
-
-    @InjectMocks
-    private AppointmentService appointmentService;
+    @Mock private AppointmentRepository appointmentRepository;
+    @Mock private PatientRepository patientRepository;
+    @Mock private PsychologistRepository psychologistRepository;
+    @Mock private AvailabilityRepository availabilityRepository;
+    @InjectMocks private AppointmentService appointmentService;
 
     private Patient patient;
     private Psychologist psychologist;
@@ -70,7 +59,7 @@ public class AppointmentServiceTest {
     }
 
     @Test
-    void testCreateSuccess() throws Exception {
+    void testCreateSuccess() {
         AppointmentRequest req = new AppointmentRequest();
         req.setIdPatient(1L);
         req.setIdPsychologist(2L);
@@ -83,14 +72,12 @@ public class AppointmentServiceTest {
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
         when(psychologistRepository.findById(2L)).thenReturn(Optional.of(psychologist));
         when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(2L, today.getDayOfWeek()))
-                .thenReturn(List.of(
-                        createAvailability(2L, today.getDayOfWeek(), at10, at10.plusHours(4))
-                ));
+                .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(4))));
         when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
                 .thenReturn(Collections.emptyList());
+
         ArgumentCaptor<Appointment> cap = ArgumentCaptor.forClass(Appointment.class);
-        when(appointmentRepository.save(cap.capture()))
-                .thenAnswer(i -> i.getArgument(0));
+        when(appointmentRepository.save(cap.capture())).thenAnswer(i -> i.getArgument(0));
 
         Appointment out = appointmentService.create(req);
 
@@ -109,7 +96,8 @@ public class AppointmentServiceTest {
         when(patientRepository.findById(1L)).thenReturn(Optional.empty());
         AppointmentRequest req = new AppointmentRequest();
         req.setIdPatient(1L);
-        Exception ex = assertThrows(Exception.class, () -> appointmentService.create(req));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> appointmentService.create(req));
         assertEquals("Paciente não encontrado", ex.getMessage());
     }
 
@@ -120,7 +108,8 @@ public class AppointmentServiceTest {
         AppointmentRequest req = new AppointmentRequest();
         req.setIdPatient(1L);
         req.setIdPsychologist(2L);
-        Exception ex = assertThrows(Exception.class, () -> appointmentService.create(req));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> appointmentService.create(req));
         assertEquals("Psicólogo não encontrado", ex.getMessage());
     }
 
@@ -136,7 +125,8 @@ public class AppointmentServiceTest {
         req.setDate(today);
         req.setTime(at10);
         req.setDuration(30);
-        Exception ex = assertThrows(Exception.class, () -> appointmentService.create(req));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> appointmentService.create(req));
         assertEquals("Horário fora da disponibilidade do psicólogo", ex.getMessage());
     }
 
@@ -145,7 +135,7 @@ public class AppointmentServiceTest {
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
         when(psychologistRepository.findById(2L)).thenReturn(Optional.of(psychologist));
         when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
-                .thenReturn(List.of(createAvailability(2L, today.getDayOfWeek(), at10, at10.plusHours(2))));
+                .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(2))));
         when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
                 .thenReturn(List.of(existing));
         AppointmentRequest req = new AppointmentRequest();
@@ -155,12 +145,13 @@ public class AppointmentServiceTest {
         req.setTime(at10.plusMinutes(30));
         req.setDuration(60);
         req.setStatus(AppointmentStatus.SCHEDULED);
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> appointmentService.create(req));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> appointmentService.create(req));
         assertEquals("Conflito de horário com outro agendamento", ex.getMessage());
     }
 
     @Test
-    void testUpdateSuccess() throws Exception {
+    void testUpdateSuccess() {
         AppointmentUpdateRequest req = new AppointmentUpdateRequest();
         req.setDate(today.plusDays(1));
         req.setTime(at10.plusHours(1));
@@ -170,7 +161,7 @@ public class AppointmentServiceTest {
 
         when(appointmentRepository.findById(5L)).thenReturn(Optional.of(existing));
         when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
-                .thenReturn(List.of(createAvailability(2L, today.plusDays(1).getDayOfWeek(), at10, at10.plusHours(3))));
+                .thenReturn(List.of(createAvailability(today.plusDays(1).getDayOfWeek(), at10, at10.plusHours(3))));
         when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today.plusDays(1)))
                 .thenReturn(List.of(existing));
         when(appointmentRepository.save(existing)).thenReturn(existing);
@@ -201,7 +192,8 @@ public class AppointmentServiceTest {
         req.setDate(today);
         req.setTime(at10);
         req.setDuration(30);
-        Exception ex = assertThrows(Exception.class, () -> appointmentService.update(5L, req));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> appointmentService.update(5L, req));
         assertEquals("Horário fora da disponibilidade do psicólogo", ex.getMessage());
     }
 
@@ -218,16 +210,17 @@ public class AppointmentServiceTest {
 
         when(appointmentRepository.findById(5L)).thenReturn(Optional.of(existing));
         when(availabilityRepository.findByPsychologistIdPsychologistAndDayOfWeek(eq(2L), any()))
-                .thenReturn(List.of(createAvailability(2L, today.getDayOfWeek(), at10, at10.plusHours(4))));
+                .thenReturn(List.of(createAvailability(today.getDayOfWeek(), at10, at10.plusHours(4))));
         when(appointmentRepository.findByPsychologist_IdPsychologistAndDate(2L, today))
                 .thenReturn(List.of(existing, other));
+
         AppointmentUpdateRequest req = new AppointmentUpdateRequest();
         req.setDate(today);
         req.setTime(at10.plusHours(1));
         req.setDuration(30);
         req.setStatus(AppointmentStatus.SCHEDULED);
         req.setNotes("");
-        RuntimeException ex = assertThrows(RuntimeException.class,
+        IllegalStateException ex = assertThrows(IllegalStateException.class,
                 () -> appointmentService.update(5L, req));
         assertEquals("Conflito de horário com outro agendamento", ex.getMessage());
     }
@@ -281,11 +274,10 @@ public class AppointmentServiceTest {
         assertEquals(existing, out.getContent().get(0));
     }
 
-    // helper
-    private PsychologistAvailability createAvailability(Long pid, DayOfWeek dow, LocalTime s, LocalTime e) {
+    private PsychologistAvailability createAvailability(DayOfWeek dow, LocalTime s, LocalTime e) {
         return PsychologistAvailability.builder()
                 .id(99L)
-                .psychologist(Psychologist.builder().idPsychologist(pid).build())
+                .psychologist(Psychologist.builder().idPsychologist(2L).build())
                 .dayOfWeek(dow)
                 .startTime(s)
                 .endTime(e)
