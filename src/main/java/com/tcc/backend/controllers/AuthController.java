@@ -26,6 +26,10 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         User user = service.getByEmail(loginRequest.getEmail());
 
+        if (user == null) {
+            return ResponseEntity.status(404).body("Credenciais inválidas");
+        }
+
         if (service.validatePassword(loginRequest.getPassword(), user.getPassword())) {
             String token = jwtUtil.generateToken(user.getIdUser().toString());
             return ResponseEntity.ok(new LoginResponse(token));
