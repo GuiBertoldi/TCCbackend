@@ -1,6 +1,5 @@
 package com.tcc.backend;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tcc.backend.controllers.AppointmentController;
 import com.tcc.backend.dtos.appointment.AppointmentRequest;
 import com.tcc.backend.enums.AppointmentStatus;
