@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AppointmentServiceTest {
+class AppointmentServiceTest {
 
     @Mock private AppointmentRepository appointmentRepository;
     @Mock private PatientRepository patientRepository;
