@@ -16,6 +16,7 @@ import org.springframework.data.domain.*;
 
 import java.util.*;
 
+import static com.tcc.backend.services.FollowupService.PATIENT_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -82,7 +83,7 @@ class FollowupServiceTest {
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> followupService.create(req));
-        assertEquals("Paciente não encontrado com o ID: 99", ex.getMessage());
+        assertEquals(PATIENT_NOT_FOUND + "99", ex.getMessage());
     }
 
     @Test
@@ -125,7 +126,7 @@ class FollowupServiceTest {
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> followupService.update(100L, req));
-        assertEquals("Paciente não encontrado com o ID: 55", ex.getMessage());
+        assertEquals(PATIENT_NOT_FOUND +  "55", ex.getMessage());
     }
 
     @Test
@@ -172,7 +173,7 @@ class FollowupServiceTest {
         when(patientRepository.findById(99L)).thenReturn(Optional.empty());
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> followupService.getByPatient(99L));
-        assertEquals("Paciente não encontrado com o ID: 99", ex.getMessage());
+        assertEquals(PATIENT_NOT_FOUND + "99", ex.getMessage());
     }
 
     @Test
