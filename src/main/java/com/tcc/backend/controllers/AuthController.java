@@ -23,18 +23,18 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
         User user = service.getByEmail(loginRequest.getEmail());
 
         if (user == null) {
-            return ResponseEntity.status(404).body(new LoginResponse("Credenciais inválidas", null));
+            return ResponseEntity.status(404).body("Credenciais inválidas");
         }
 
         if (service.validatePassword(loginRequest.getPassword(), user.getPassword())) {
             String token = jwtUtil.generateToken(user.getIdUser().toString());
-            return ResponseEntity.ok(new LoginResponse("Login bem-sucedido", token));
+            return ResponseEntity.ok(token);
         } else {
-            return ResponseEntity.status(401).body(new LoginResponse("Credenciais inválidas", null));
+            return ResponseEntity.status(401).body("Credenciais inválidas");
         }
     }
 
