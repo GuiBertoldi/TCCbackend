@@ -20,6 +20,8 @@ public class FollowupService {
     private final FollowupRepository followupRepository;
     private final PatientRepository patientRepository;
 
+    public static final String  PATIENT_NOT_FOUND  = "PATIENT_NOT_FOUND ";
+
     @Autowired
     public FollowupService(FollowupRepository followupRepository, PatientRepository patientRepository) {
         this.followupRepository = followupRepository;
@@ -28,7 +30,7 @@ public class FollowupService {
 
     public Followup create(FollowupRequest request) {
         Patient patient = patientRepository.findByUserId(request.getPatientId())
-                .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + request.getPatientId()));
+                .orElseThrow(() -> new IllegalArgumentException(PATIENT_NOT_FOUND + request.getPatientId()));
 
         Followup followup = Followup.builder()
                 .idPatient(patient)
@@ -43,7 +45,7 @@ public class FollowupService {
         Followup existingFollowup = getById(idFollowup);
 
         Patient patient = patientRepository.findByUserId(request.getPatientId())
-                .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + request.getPatientId()));
+                .orElseThrow(() -> new IllegalArgumentException(PATIENT_NOT_FOUND + request.getPatientId()));
 
         existingFollowup.setIdPatient(patient);
         existingFollowup.setProfessionalName(request.getProfessionalName());
@@ -64,7 +66,7 @@ public class FollowupService {
 
     public Followup getByPatient(Long patientId) {
         Patient patient = patientRepository.findById(patientId)
-                .orElseThrow(() -> new IllegalArgumentException("Paciente não encontrado com o ID: " + patientId));
+                .orElseThrow(() -> new IllegalArgumentException(PATIENT_NOT_FOUND + patientId));
         return followupRepository.findByIdPatient(patient)
                 .orElseThrow(() -> new IllegalArgumentException("Acompanhamento não encontrado para o paciente informado."));
     }
