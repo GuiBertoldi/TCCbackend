@@ -27,7 +27,7 @@ public class AuthController {
         User user = service.getByEmail(loginRequest.getEmail());
 
         if (user == null) {
-            return ResponseEntity.status(404).body("Usuário não encontrado");
+            return ResponseEntity.status(404).body("Credenciais inválidas");
         }
 
         if (service.validatePassword(loginRequest.getPassword(), user.getPassword())) {
