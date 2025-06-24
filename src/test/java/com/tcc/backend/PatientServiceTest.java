@@ -140,11 +140,11 @@ class PatientServiceTest {
     void testUpdatePatientNotFound() {
         when(patientRepository.findById(99L)).thenReturn(Optional.empty());
 
-        IllegalArgumentException ex = assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
-                () -> patientService.updatePatient(99L, new PatientRequest())
+                () -> patientService.updatePatient(99L, new PatientRequest()),
+                "Paciente não encontrado com o ID: 99"
         );
-        assertTrue(ex.getMessage().contains("Paciente não encontrado com o ID: 99"));
     }
 
     @Test

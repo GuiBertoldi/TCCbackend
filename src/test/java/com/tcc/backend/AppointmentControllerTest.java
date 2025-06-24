@@ -37,8 +37,6 @@ class AppointmentControllerTest {
     @InjectMocks
     private AppointmentController appointmentController;
 
-    private ObjectMapper objectMapper;
-
     private MockMvc mockMvc;
 
     private Patient patient;

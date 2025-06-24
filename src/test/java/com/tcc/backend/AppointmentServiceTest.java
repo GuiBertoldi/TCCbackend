@@ -84,7 +84,7 @@ class AppointmentServiceTest {
         when(appointmentRepository.save(cap.capture()))
                 .thenAnswer(i -> i.getArgument(0));
 
-        Appointment out = appointmentService.create(req);
+        appointmentService.create(req);
 
         Appointment passed = cap.getValue();
         assertEquals(patient, passed.getPatient());

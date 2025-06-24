@@ -52,6 +52,6 @@ public class AvailabilityService {
         return repository.findByPsychologistIdPsychologist(idPsychologist)
                 .stream()
                 .map(AvailabilityResponse::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

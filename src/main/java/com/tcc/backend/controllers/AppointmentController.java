@@ -27,13 +27,13 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public ResponseEntity<AppointmentResponse> create(@RequestBody @Valid AppointmentRequest request) throws Exception {
+    public ResponseEntity<AppointmentResponse> create(@RequestBody @Valid AppointmentRequest request){
         Appointment appointment = service.create(request);
         return new ResponseEntity<>(AppointmentResponse.fromEntity(appointment), HttpStatus.CREATED);
     }
  
     @PutMapping("/{idAppointment}")
-    public ResponseEntity<AppointmentResponse> update(@PathVariable Long idAppointment, @RequestBody @Valid AppointmentUpdateRequest request) throws Exception {
+    public ResponseEntity<AppointmentResponse> update(@PathVariable Long idAppointment, @RequestBody @Valid AppointmentUpdateRequest request){
         Appointment appointment = service.update(idAppointment, request);
         return new ResponseEntity<>(AppointmentResponse.fromEntity(appointment), HttpStatus.OK);
     }
