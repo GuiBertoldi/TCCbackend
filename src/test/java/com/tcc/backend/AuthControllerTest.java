@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthControllerTest {
+class AuthControllerTest {
 
     @Mock
     private UserService userService;
@@ -40,15 +40,13 @@ public class AuthControllerTest {
 
     @Test
     void testLoginWithValidCredentials() throws Exception {
-        // Arrange
-        LoginRequest request = new LoginRequest("test@example.com", "validPassword");
+        new LoginRequest("test@example.com", "validPassword");
         User user = new User(1L, UserType.PSICOLOGO, "Test User", "test@example.com", "hashedPassword", "12345678901", "123456789", "12345", "Test City", "Test Neighborhood", "Test Street", 123, "Test Complement");
 
         when(userService.getByEmail("test@example.com")).thenReturn(user);
         when(userService.validatePassword("validPassword", "hashedPassword")).thenReturn(true);
         when(jwtUtil.generateToken("1")).thenReturn("validToken");
 
-        // Act and Assert
         mockMvc.perform(post("/auth/login")
                         .contentType("application/json")
                         .content("{ \"email\": \"test@example.com\", \"password\": \"validPassword\" }"))
@@ -57,12 +55,10 @@ public class AuthControllerTest {
 
     @Test
     void testLoginWhenUserNotFound() throws Exception {
-        // Arrange
-        LoginRequest request = new LoginRequest("test@example.com", "validPassword");
+        new LoginRequest("test@example.com", "validPassword");
 
         when(userService.getByEmail("test@example.com")).thenReturn(null);
 
-        // Act and Assert
         mockMvc.perform(post("/auth/login")
                         .contentType("application/json")
                         .content("{ \"email\": \"test@example.com\", \"password\": \"validPassword\" }"))
@@ -71,14 +67,12 @@ public class AuthControllerTest {
 
     @Test
     void testLoginWithInvalidCredentials() throws Exception {
-        // Arrange
-        LoginRequest request = new LoginRequest("test@example.com", "invalidPassword");
+        new LoginRequest("test@example.com", "invalidPassword");
         User user = new User(1L, UserType.PSICOLOGO, "Test User", "test@example.com", "hashedPassword", "12345678901", "123456789", "12345", "Test City", "Test Neighborhood", "Test Street", 123, "Test Complement");
 
         when(userService.getByEmail("test@example.com")).thenReturn(user);
         when(userService.validatePassword("invalidPassword", "hashedPassword")).thenReturn(false);
 
-        // Act and Assert
         mockMvc.perform(post("/auth/login")
                         .contentType("application/json")
                         .content("{ \"email\": \"test@example.com\", \"password\": \"invalidPassword\" }"))
