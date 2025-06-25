@@ -1,10 +1,12 @@
 package com.tcc.backend.controllers;
 
 import com.tcc.backend.config.JwtUtil;
+import com.tcc.backend.config.exceptions.InvalidCredentialsException;
 import com.tcc.backend.dtos.login.LoginRequest;
 import com.tcc.backend.dtos.login.LoginResponse;
 import com.tcc.backend.models.User;
 import com.tcc.backend.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,18 +25,19 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        User user = service.getByEmail(loginRequest.getEmail());
+    public ResponseEntity<LoginResponse> authenticate(@RequestBody @Valid LoginRequest request) {
+        User user = service.getByEmail(request.getEmail());
 
         if (user == null) {
-            return ResponseEntity.status(404).body("Credenciais inválidas");
+            throw new InvalidCredentialsException();
         }
 
-        if (service.validatePassword(loginRequest.getPassword(), user.getPassword())) {
-            String token = jwtUtil.generateToken(user.getIdUser().toString());
-            return ResponseEntity.ok(new LoginResponse(token));
-        } else {
-            return ResponseEntity.status(401).body("Credenciais inválidas");
+        if (!service.validatePassword(request.getPassword(), user.getPassword())) {
+            throw new InvalidCredentialsException();
         }
+
+        String token = jwtUtil.generateToken(user.getIdUser().toString());
+        LoginResponse response = new LoginResponse(token);
+        return ResponseEntity.ok(response);
     }
 }

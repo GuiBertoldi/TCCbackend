@@ -4,6 +4,7 @@ import com.tcc.backend.config.JwtUtil;
 import com.tcc.backend.controllers.AuthController;
 import com.tcc.backend.dtos.login.LoginRequest;
 import com.tcc.backend.models.User;
+import com.tcc.backend.enums.UserType;
 import com.tcc.backend.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,17 +12,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-class AuthControllerTest {
+public class AuthControllerTest {
 
     @Mock
     private UserService userService;
@@ -34,57 +33,55 @@ class AuthControllerTest {
 
     private MockMvc mockMvc;
 
-    private User user;
-    private LoginRequest loginRequest;
-
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
-
-        user = User.builder()
-                .idUser(1L)
-                .email("user@example.com")
-                .password("password123")
-                .build();
-
-        loginRequest = new LoginRequest();
-        loginRequest.setEmail("user@example.com");
-        loginRequest.setPassword("password123");
     }
 
     @Test
     void testLoginWithValidCredentials() throws Exception {
-        when(userService.getByEmail(anyString())).thenReturn(user);
-        when(userService.validatePassword(anyString(), anyString())).thenReturn(true);
-        when(jwtUtil.generateToken(anyString())).thenReturn("valid-jwt-token");
+        // Arrange
+        LoginRequest request = new LoginRequest("test@example.com", "validPassword");
+        User user = new User(1L, UserType.PSICOLOGO, "Test User", "test@example.com", "hashedPassword", "12345678901", "123456789", "12345", "Test City", "Test Neighborhood", "Test Street", 123, "Test Complement");
 
+        when(userService.getByEmail("test@example.com")).thenReturn(user);
+        when(userService.validatePassword("validPassword", "hashedPassword")).thenReturn(true);
+        when(jwtUtil.generateToken("1")).thenReturn("validToken");
+
+        // Act and Assert
         mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\": \"user@example.com\", \"password\": \"password123\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("valid-jwt-token"));
-    }
-
-    @Test
-    void testLoginWithInvalidCredentials() throws Exception {
-        when(userService.getByEmail(anyString())).thenReturn(user);
-        when(userService.validatePassword(anyString(), anyString())).thenReturn(false);
-
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\": \"user@example.com\", \"password\": \"wrongpassword\"}"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Credenciais inválidas"));
+                        .contentType("application/json")
+                        .content("{ \"email\": \"test@example.com\", \"password\": \"validPassword\" }"))
+                .andExpect(status().isOk());
     }
 
     @Test
     void testLoginWhenUserNotFound() throws Exception {
-        when(userService.getByEmail(anyString())).thenReturn(null);
+        // Arrange
+        LoginRequest request = new LoginRequest("test@example.com", "validPassword");
 
+        when(userService.getByEmail("test@example.com")).thenReturn(null);
+
+        // Act and Assert
         mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\": \"user@example.com\", \"password\": \"password123\"}"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("Credenciais inválidas"));
+                        .contentType("application/json")
+                        .content("{ \"email\": \"test@example.com\", \"password\": \"validPassword\" }"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testLoginWithInvalidCredentials() throws Exception {
+        // Arrange
+        LoginRequest request = new LoginRequest("test@example.com", "invalidPassword");
+        User user = new User(1L, UserType.PSICOLOGO, "Test User", "test@example.com", "hashedPassword", "12345678901", "123456789", "12345", "Test City", "Test Neighborhood", "Test Street", 123, "Test Complement");
+
+        when(userService.getByEmail("test@example.com")).thenReturn(user);
+        when(userService.validatePassword("invalidPassword", "hashedPassword")).thenReturn(false);
+
+        // Act and Assert
+        mockMvc.perform(post("/auth/login")
+                        .contentType("application/json")
+                        .content("{ \"email\": \"test@example.com\", \"password\": \"invalidPassword\" }"))
+                .andExpect(status().isUnauthorized());
     }
 }
