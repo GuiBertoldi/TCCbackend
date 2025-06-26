@@ -85,6 +85,6 @@ jobs:
             -e DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
             -e DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
             -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
-            -e KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
+            -e KEYSTORE_PASSWORD="${{ secrets.KEYSTORE_PASSWORD }}" \
             --name tccbackend \
             ${{ secrets.DOCKER_USERNAME }}/tccbackend:latest
