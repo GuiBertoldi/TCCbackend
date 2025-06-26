@@ -81,7 +81,7 @@ jobs:
         run: |
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/tccbackend:latest
           sudo docker rm -f tccbackend || true
-          sudo docker run -d -p 8080:8080 \
+          sudo docker run -d -p 8080:8080 -p 8443:8443 \
             -e DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
             -e DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
             -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
