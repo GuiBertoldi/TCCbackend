@@ -42,6 +42,4 @@ public class User {
     private String street;
     @Column(name = "num_user")
     private Integer number;
-    @Column(name = "comp_user")
-    private String complement;
 }

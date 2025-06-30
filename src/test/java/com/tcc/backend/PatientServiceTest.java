@@ -61,7 +61,6 @@ class PatientServiceTest {
         req.setNeighborhood("BairroY");
         req.setStreet("RuaZ");
         req.setNumber(100);
-        req.setComplement("Apto1");
         req.setEmergencyContact("ContatoX");
         req.setFatherName("PaiX");
         req.setFatherEducation("Ensino Médio");
@@ -105,7 +104,6 @@ class PatientServiceTest {
         req.setNeighborhood("Bairro Exemplo");
         req.setStreet("Rua Exemplo");
         req.setNumber(123);
-        req.setComplement("Apto 456");
         req.setEmergencyContact("Novo Contato");
         req.setFatherName("Novo Pai");
         req.setFatherEducation("Educação Pai");

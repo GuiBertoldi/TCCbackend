@@ -60,7 +60,6 @@ class PsychologistControllerTest {
                 .neighborhood("Centro")
                 .street("Rua A")
                 .number(100)
-                .complement("Apto 1")
                 .build();
 
         return Psychologist.builder()

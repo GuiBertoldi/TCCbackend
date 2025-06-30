@@ -44,6 +44,4 @@ public class UserRequest {
     private String street;
 
     private Integer number;
-
-    private String complement;
 }

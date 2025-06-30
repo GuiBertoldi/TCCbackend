@@ -54,7 +54,6 @@ public class UserService {
                 .neighborhood(request.getNeighborhood())
                 .street(request.getStreet())
                 .number(request.getNumber())
-                .complement(request.getComplement())
                 .build();
         return repository.save(newUser);
     }
@@ -86,7 +85,6 @@ public class UserService {
                 .neighborhood(request.getNeighborhood())
                 .street(request.getStreet())
                 .number(request.getNumber())
-                .complement(request.getComplement())
                 .build());
     }
 

@@ -58,7 +58,6 @@ class PatientControllerTest {
                 .neighborhood("Copacabana")
                 .street("Av. Atlântica")
                 .number(1000)
-                .complement("Bloco A")
                 .build();
 
         return Patient.builder()
@@ -80,7 +79,6 @@ class PatientControllerTest {
                 .neighborhood("Copacabana")
                 .street("Av. Atlântica")
                 .number(1000)
-                .complement("Bloco A")
                 .build();
     }
 

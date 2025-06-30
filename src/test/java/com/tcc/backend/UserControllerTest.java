@@ -60,7 +60,6 @@ class UserControllerTest {
                 .neighborhood("Centro")
                 .street("Rua A")
                 .number(100)
-                .complement("Apto 1")
                 .build();
     }
 
@@ -77,7 +76,6 @@ class UserControllerTest {
                 .neighborhood("Centro")
                 .street("Rua A")
                 .number(100)
-                .complement("Apto 1")
                 .build();
     }
 

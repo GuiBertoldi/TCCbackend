@@ -37,7 +37,6 @@ public class PatientService {
                 .neighborhood(patientRequest.getNeighborhood())
                 .street(patientRequest.getStreet())
                 .number(patientRequest.getNumber())
-                .complement(patientRequest.getComplement())
                 .build();
 
         User createdUser = userService.create(userRequest);
@@ -75,7 +74,6 @@ public class PatientService {
                 .neighborhood(patientRequest.getNeighborhood())
                 .street(patientRequest.getStreet())
                 .number(patientRequest.getNumber())
-                .complement(patientRequest.getComplement())
                 .build();
 
         userService.update(existingPatient.getIdUser().getIdUser(), userRequest);

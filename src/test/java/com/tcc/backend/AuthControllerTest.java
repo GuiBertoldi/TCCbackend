@@ -41,7 +41,7 @@ class AuthControllerTest {
     @Test
     void testLoginWithValidCredentials() throws Exception {
         new LoginRequest("test@example.com", "validPassword");
-        User user = new User(1L, UserType.PSICOLOGO, "Test User", "test@example.com", "hashedPassword", "12345678901", "123456789", "12345", "Test City", "Test Neighborhood", "Test Street", 123, "Test Complement");
+        User user = new User(1L, UserType.PSICOLOGO, "Test User", "test@example.com", "hashedPassword", "12345678901", "123456789", "12345", "Test City", "Test Neighborhood", "Test Street", 123);
 
         when(userService.getByEmail("test@example.com")).thenReturn(user);
         when(userService.validatePassword("validPassword", "hashedPassword")).thenReturn(true);
@@ -68,7 +68,7 @@ class AuthControllerTest {
     @Test
     void testLoginWithInvalidCredentials() throws Exception {
         new LoginRequest("test@example.com", "invalidPassword");
-        User user = new User(1L, UserType.PSICOLOGO, "Test User", "test@example.com", "hashedPassword", "12345678901", "123456789", "12345", "Test City", "Test Neighborhood", "Test Street", 123, "Test Complement");
+        User user = new User(1L, UserType.PSICOLOGO, "Test User", "test@example.com", "hashedPassword", "12345678901", "123456789", "12345", "Test City", "Test Neighborhood", "Test Street", 123);
 
         when(userService.getByEmail("test@example.com")).thenReturn(user);
         when(userService.validatePassword("invalidPassword", "hashedPassword")).thenReturn(false);
