@@ -1,71 +1,130 @@
-# Portifolio-Catolica teste
 
-#Resumo:
-O sistema é voltado para pequenos consultórios de psicologia, realizando o prontuários dos pacientes, impressão de documentos e agendamento de consultas, pois normalmente consultórios de pequeno porte não possuem um sistema, sendo feito agendamentos e gerenciamento de prontuários manualmente.
+# **README - Backend do Sistema de Gerenciamento de Prontuários Psicológicos e Agendamento de Consultas
 
-#Repoitório do projeto:
-https://github.com/GuiBertoldi/portifolioCatolica/
+## 1. **Introdução**
 
-#Requisitos Funcionais
+### 1.1. **Contexto**
+Este repositório contém o **backend** do **Sistema de Gerenciamento de Prontuários Psicológicos e Agendamento de Consultas**, desenvolvido em **Spring Boot** com **Java**. O sistema lida com a lógica de negócios, processamento de dados e comunicação com o banco de dados, permitindo o gerenciamento de prontuários, agendamento de consultas e controle de horários de psicólogos.
 
-RF1: Criação de Prontuário
-Descrição: O sistema deve permitir ao psicólogo criar um novo prontuário para cada paciente, inserindo dados pessoais e informações clínicas iniciais.
+### 1.2. **Justificativa**
+O objetivo é fornecer uma plataforma para psicólogos, garantindo o gerenciamento eficiente de prontuários e consultas, e permitindo a integração de funcionalidades administrativas como o controle de horários. Além disso, o backend foi projetado para ser escalável e seguro.
 
-RF2: Atualização de Prontuário
-Descrição: Após cada consulta, o psicólogo deve poder atualizar o prontuário do paciente com novas informações, acompanhando a evolução do tratamento.
+### 1.3. **Objetivo**
+Automatizar e digitalizar os processos administrativos de psicólogos, como:
+- Criação e atualização de prontuários de pacientes.
+- Agendamento e visualização de sessões de psicologia.
+- Gerenciamento de horários dos psicólogos.
 
-RF3: Impressão de Documentos
-Descrição: O sistema deve oferecer uma funcionalidade para a impressão de documentos padrão, como declarações e atestados, com base nos dados do paciente e da clínica.
+---
 
-RF4: Gestão de Login
-Descrição: A landing page deve fornecer um meio seguro de login para os psicólogos acessarem o sistema, utilizando credenciais pré-definidas.
+## 2. **Tecnologias Utilizadas**
 
-RF5: Agendamento por Pacientes
-Descrição: Pacientes devem ser capazes de solicitar agendamentos pela landing page, selecionando datas e horários disponíveis, e fornecendo informações básicas para contato.
+- **Spring Boot**: Framework Java para construção da API.
+- **Spring Data JPA**: Para interação com o banco de dados (PostgreSQL).
+- **JUnit**: Framework de testes unitários para garantir a qualidade do código.
+- **Docker**: Para containerização do backend.
+- **AWS EC2**: Para deploy do backend na infraestrutura em nuvem.
+- **Datadog**: Para monitoramento de performance e logs.
 
-RF6: Gestão de Agendamentos pelo Psicólogo
-Descrição: O psicólogo deve poder visualizar, aceitar ou recusar agendamentos solicitados, bem como agendar novas consultas diretamente pelo sistema.
+---
 
-RF7: Envio de Confirmação de Agendamento
-Descrição: O sistema deve enviar automaticamente e-mails de confirmação para os pacientes quando um agendamento for aceito pelo psicólogo.
+## 3. **Montagem do Ambiente Local**
 
-RF8: Cadastro de usuários.
-Descrição: O sistema deve permitir a inclusão de 2 tipos de usuários, psicólogo e paciente. O psicólogo será criado apenas pelo administrador do sistema, já o paciente, poderá ser criado pelo psicólogo.
+### 3.1. **Pré-requisitos**
 
-RNF9: Acesso a prontuários
-Descrição: O sistema deve tratar o acesso aos prontuários, sendo permitido o acesso apenas ao psicólogo responsável.
+Antes de rodar o backend localmente, você precisa ter as seguintes ferramentas instaladas:
 
-#Requisitos Não Funcionais
+- **Java 17** (OpenJDK)
+- **Maven** ou **Gradle** (para gerenciar dependências e construir o projeto)
+- **PostgreSQL**
 
-RNF1: Segurança das Informações
-Descrição: O sistema deve garantir a segurança e confidencialidade dos dados dos pacientes, utilizando criptografia para armazenamento e transmissão de dados sensíveis.
+### 3.2. **Clonando o Repositório**
 
-RNF2: Usabilidade
-Descrição: A interface do usuário deve ser intuitiva e amigável, permitindo fácil navegação e utilização por parte dos psicólogos e pacientes.
+Clone o repositório para o seu ambiente local:
 
-RNF3: Desempenho
-Descrição: O sistema deve responder rapidamente às interações dos usuários, com tempos de carregamento curtos e feedback imediato para operações realizadas.
+```bash
+git clone https://github.com/GuiBertoldi/TCCbackend.git
+cd TCCbackend
+```
 
-RNF4: Responsividade
-Descrição: O sistema deve ser responsivo, garantindo uma experiência de usuário adequada e eficiente em diferentes tamanhos de tela, incluindo desktops, tablets e smartphones.
+### 3.3. **Instalação das Dependências**
 
-RNF5: Compatibilidade
-Descrição: O sistema deve ser compatível com os principais navegadores web e dispositivos móveis, garantindo acesso amplo.
+Se você estiver utilizando o Maven:
 
-RNF6: Escalabilidade
-Descrição: O sistema deve ser projetado para facilitar atualizações e a adição de novas funcionalidades, sem afetar o desempenho geral.
+```bash
+mvn clean install
+```
 
-#Diagrama de caso de uso:
-https://app.diagrams.net/#G1NqbOBwIUmCYJGdKT-p58vH3NPlBdMwSk#%7B%22pageId%22%3A%22CEWAIqBBuxIsXhfwTkxY%22%7D
+### 3.4. **Configuração do Banco de Dados**
 
-#Modelagem C4:
-https://app.diagrams.net/#G12Fmr77mUO2I1hfgvqexYJyZqW7YbGhQZ#%7B%22pageId%22%3A%22beAhDlbsjRryqcp8PAHT%22%7D
 
-#Plano de trabalho - Jira:
-https://portifoliocatolica.atlassian.net/jira/core/projects/PC/board
+Configure as credenciais no arquivo `application.properties` ou `application.yml`:
 
-#Documentação completa
-https://docs.google.com/document/d/138YQyWQwToKGpdoL5pM26lZbNUYKrAj0CF4wVRMhy_o/edit
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/yourdbname
+spring.datasource.username=postgres
+spring.datasource.password=password
+```
 
-#Design - Figma
-https://www.figma.com/design/ZpLjIQNsBMAlqIIKzfwjYJ/Layout-TCC?node-id=0-1&t=rhleRxE8iZHLQMcT-1
+### 3.5. **Rodando o Backend Localmente**
+
+Para rodar o backend, use o comando:
+
+```bash
+mvn spring-boot:run
+```
+
+O backend será iniciado no endereço `http://localhost:8080`.
+
+---
+
+## 4. **CI/CD com GitHub Actions**
+
+O repositório utiliza **GitHub Actions** para automação de **build**, **testes**, **deploy** e **monitoramento** do backend.
+
+### 4.1. **Fluxo de Trabalho do GitHub Actions**
+
+1. **Commit e Push**:
+    - Quando um desenvolvedor faz um commit e push para o repositório, o GitHub Actions inicia o fluxo de integração contínua (CI).
+
+2. **Build e Testes**:
+    - O **GitHub Actions** realiza a **compilação** do código e executa os **testes unitários** (usando **JUnit**).
+    - Se todos os testes passarem, o código é aprovado para o próximo passo.
+
+3. **Containerização com Docker**:
+    - O código é **containerizado** utilizando o Docker.
+    - O **Dockerfile** presente no repositório configura a construção da imagem Docker, permitindo rodar o backend dentro de um container.
+
+4. **Deploy na AWS EC2**:
+    - Após a containerização, o código é **implantado** em uma **instância EC2** na AWS.
+    - Isso garante que o backend esteja disponível em um ambiente de produção escalável e robusto.
+
+5. **Monitoramento com Datadog**:
+    - O **Datadog** é configurado para monitorar a aplicação, coletando métricas sobre o desempenho e disponibilizando visualizações para acompanhar o uso da aplicação.
+
+
+## 5. **Considerações de Segurança**
+
+### 5.1. **Armazenamento Seguro de Dados**
+- **Criptografia de Senhas**: As senhas de usuários e outras informações sensíveis devem ser criptografadas usando algoritmos seguros.
+- **HTTPS**: Toda comunicação entre o frontend e o backend deve ser feita sobre **HTTPS** para garantir a segurança dos dados transmitidos.
+
+---
+
+## 6. **Considerações de Deploy**
+
+### 6.1. **AWS EC2**
+O backend é **deployado** em uma instância **AWS EC2**. Após o deploy, a instância é configurada para rodar o **Docker** e garantir que a aplicação esteja acessível ao público.
+
+### 6.2. **Datadog**
+O **Datadog** é configurado para monitorar a aplicação, coletando métricas sobre o desempenho e disponibilizando visualizações para acompanhar o uso da aplicação.
+
+---
+
+## 7. **Referências**
+
+- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [Docker Documentation](https://docs.docker.com/)
+- [AWS EC2 Documentation](https://aws.amazon.com/ec2/)
+- [Datadog Documentation](https://www.datadoghq.com/)
+- [JUnit Documentation](https://junit.org/)
